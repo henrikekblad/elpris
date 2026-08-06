@@ -35,9 +35,9 @@ jobs:
       contents: write
     env:
       SIGNING_STORE_PATH: ${{ github.workspace }}/release.jks
-      SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
-      SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-      SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+      SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASS }}
+      SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASS }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
@@ -49,8 +49,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Restore signing keystore
         env:
-          SIGNING_STORE_BASE64: ${{ secrets.SIGNING_STORE_BASE64 }}
-        run: echo "$SIGNING_STORE_BASE64" | base64 --decode > "$SIGNING_STORE_PATH"
+          ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
+        run: printf '%s' "$ANDROID_KEYSTORE" | base64 --decode > "$SIGNING_STORE_PATH"
       - run: ./gradlew assembleRelease
       - uses: actions/upload-artifact@v4
         with:
