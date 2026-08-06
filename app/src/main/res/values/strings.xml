@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Elpris</string>
+    <string name="widget_description">Dagens och morgondagens elpriser</string>
+</resources>
