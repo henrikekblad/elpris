@@ -52,9 +52,11 @@ jobs:
           ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
         run: printf '%s' "$ANDROID_KEYSTORE" | base64 --decode > "$SIGNING_STORE_PATH"
       - run: ./gradlew assembleRelease
+      - name: Name release APK
+        run: mv app/build/outputs/apk/release/app-release.apk "app/build/outputs/apk/release/elpris-${GITHUB_REF_NAME#v}.apk"
       - uses: actions/upload-artifact@v4
         with:
           name: elpris-release
-          path: app/build/outputs/apk/release/app-release.apk
+          path: app/build/outputs/apk/release/elpris-*.apk
       - name: Publish GitHub release
-        run: gh release create "$GITHUB_REF_NAME" app/build/outputs/apk/release/app-release.apk --generate-notes --verify-tag
+        run: gh release create "$GITHUB_REF_NAME" "app/build/outputs/apk/release/elpris-${GITHUB_REF_NAME#v}.apk" --generate-notes --verify-tag
