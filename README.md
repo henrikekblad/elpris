@@ -14,6 +14,8 @@ En anpassningsbar Android-widget som visar spotpriser för idag och imorgon på 
 - Separata inställningar per widget för elområde SE1–SE4.
 - Valfri moms, energiskatt och överföringsavgift.
 - Pristabell med idag och imorgon sida vid sida, färgkodning och automatisk scrollning till aktuell tid.
+- Elbilsplanering som hittar den billigaste sammanhängande laddtiden under nästa dygn utifrån laddström, önskad energi och bilens förbrukning.
+- Valfri laddrekommendation direkt under grafen i widgeten.
 - Storleksanpassningsbar widget för olika launchers och skärmstorlekar.
 - Persistent lokal cache: senast hämtade priser finns kvar vid tillfälliga nätverksfel.
 - Automatiska publiceringskontroller från 13:00 och fortsatta återförsök tills morgondagens priser har hämtats.
@@ -29,7 +31,17 @@ En anpassningsbar Android-widget som visar spotpriser för idag och imorgon på 
 1. Installera APK-filen från projektets [Releases](../../releases).
 2. Lägg till **Elpris** från startskärmens widgetväljare.
 3. Välj elområde, upplösning och eventuella påslag.
-4. Tryck på widgeten för att öppna inställningar och pristabell.
+4. Tryck på widgeten för att öppna inställningar, pristabell och elbilsplanering.
+
+## Elbilsplanering
+
+På fliken **Elbil** väljer du laddström för trefasladdning (6–16 A), bilens ungefärliga förbrukning i kWh/mil och hur många kWh du vill ladda. Du kan ange en avresetid så att laddningen alltid hinner bli klar; nästa förekomst av det valda klockslaget används. Appen visar hur långt energin ungefär räcker, uppskattad kostnad samt den billigaste sammanhängande laddperioden före avresan eller bland priserna för de kommande 24 timmarna. När morgondagens priser ännu inte har publicerats markeras att beräkningen endast bygger på tillgängliga priser.
+
+Beräkningen utgår från 400 V trefas och ideal laddningseffekt. Verklig effekt, laddförlust och bilens laddkurva kan göra laddningen något långsammare. Tider och kostnader är därför uppskattningar.
+
+<p align="center">
+  <img src="assets/charge.jpg" alt="Elbilsplanering med laddström, förbrukning, energimängd, avresetid och rekommenderad laddperiod" width="360">
+</p>
 
 Flera widgetinstanser kan använda olika elområden och avgifter.
 
@@ -42,6 +54,8 @@ API-värdet är spotpris utan moms, skatter och tillägg. Appen räknar om krono
 ```
 
 Moms multipliceras sist. Fasta månadsavgifter ingår inte eftersom de inte kan uttryckas korrekt per kWh utan en förbrukningsprognos. Kontrollera beloppen mot ditt elnätsavtal och aktuella skatteregler.
+
+Appens förslag för 2026 är 36,0 öre/kWh i ordinarie energiskatt och 30,0 öre/kWh i överföringsavgift, båda exklusive moms. Överföringsavgiften är ett avrundat riktvärde eftersom den varierar mellan nätbolag och tariffmodeller.
 
 ## Bygga lokalt
 

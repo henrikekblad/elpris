@@ -1,0 +1,91 @@
+package se.sensnology.elpris
+
+import android.app.Activity
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.content.Intent
+import android.os.Bundle
+import android.view.Gravity
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+
+class LauncherActivity : Activity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        AppThemeSettings.apply(this)
+        super.onCreate(savedInstanceState)
+        val manager = AppWidgetManager.getInstance(this)
+        val ids = manager.getAppWidgetIds(ComponentName(this, PriceWidgetProvider::class.java))
+        val preferred = preferredWidgetId(this)
+        when (ids.size) {
+            0 -> open(STANDALONE_SETTINGS_ID)
+            1 -> open(ids.first())
+            else -> if (preferred in ids) open(preferred) else showWidgetPicker(ids)
+        }
+    }
+
+    private fun showWidgetPicker(ids: IntArray) {
+        val darkTheme = AppThemeSettings.isDark(this)
+        val background = if (darkTheme) 0xFF10151B.toInt() else 0xFFF6F7FB.toInt()
+        val textColor = if (darkTheme) 0xFFF5F7FA.toInt() else 0xFF192029.toInt()
+        val mutedColor = if (darkTheme) 0xFFA8B1BC.toInt() else 0xFF667180.toInt()
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(24), dp(28), dp(24), dp(24))
+            setBackgroundColor(background)
+        }
+        root.addView(LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER; setPadding(0, dp(10), 0, dp(10))
+            addView(ImageView(this@LauncherActivity).apply { setImageResource(R.drawable.app_icon) },
+                LinearLayout.LayoutParams(dp(38), dp(38)).apply { marginEnd = dp(10) })
+            addView(TextView(this@LauncherActivity).apply {
+                text = "Elpris"; textSize = 27f; setTextColor(textColor)
+            })
+        }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+        root.addView(TextView(this).apply {
+            text = "Välj vilken widget du vill öppna"
+            textSize = 16f
+            setTextColor(mutedColor)
+            setPadding(0, dp(12), 0, dp(12))
+        })
+        ids.forEachIndexed { index, id ->
+            val settings = WidgetSettings.load(this, id)
+            root.addView(Button(this).apply {
+                text = "Widget ${index + 1} · ${settings.area} · ${settings.intervalMinutes} min"
+                isAllCaps = false
+                textSize = 16f
+                gravity = Gravity.CENTER_VERTICAL
+                setOnClickListener { open(id) }
+            }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(54)).apply {
+                bottomMargin = dp(8)
+            })
+        }
+        setContentView(root)
+    }
+
+    private fun open(id: Int) {
+        if (id > 0) rememberWidget(this, id)
+        startActivity(Intent(this, WidgetConfigActivity::class.java).apply {
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
+            putExtra(WidgetConfigActivity.EXTRA_EXISTING_WIDGET, true)
+        })
+        finish()
+    }
+
+    private fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()
+
+    companion object {
+        private const val STANDALONE_SETTINGS_ID = 0
+        private const val PREFS = "launcher_settings"
+        private const val PREFERRED_WIDGET = "preferred_widget"
+
+        fun rememberWidget(context: android.content.Context, id: Int) {
+            context.getSharedPreferences(PREFS, android.content.Context.MODE_PRIVATE).edit().putInt(PREFERRED_WIDGET, id).apply()
+        }
+
+        private fun preferredWidgetId(context: android.content.Context): Int =
+            context.getSharedPreferences(PREFS, android.content.Context.MODE_PRIVATE).getInt(PREFERRED_WIDGET, AppWidgetManager.INVALID_APPWIDGET_ID)
+    }
+}

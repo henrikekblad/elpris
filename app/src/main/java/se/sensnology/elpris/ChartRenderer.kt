@@ -6,6 +6,8 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
 
@@ -41,6 +43,7 @@ object ChartRenderer {
         }
 
         val now = OffsetDateTime.now()
+        val chargingPlan = if (settings.showChargingPlan) ChargingPlanner.calculate(result, settings, now) else null
         val current = today.lastOrNull { it.first <= now }?.second
         val dayMax = today.maxOfOrNull { it.second }
         val dayMin = today.minOfOrNull { it.second }
@@ -70,7 +73,8 @@ object ChartRenderer {
 
         val axisText = 14f * scaledDensity
         val top = pad + headerSize * 1.65f
-        val bottom = h - pad - axisText * 1.35f
+        val footerHeight = if (chargingPlan != null) axisText * 2.0f else 0f
+        val bottom = h - pad - axisText * 1.35f - footerHeight
         val left = pad + max(axisText * 2.5f, w * .070f)
         val right = w - pad
         val minValue = min(0.0, allValues.minOrNull() ?: 0.0)
@@ -106,6 +110,20 @@ object ChartRenderer {
             canvas.drawText(label, px, bottom + axisText * 1.15f, paint)
         }
         paint.textAlign = Paint.Align.LEFT
+        chargingPlan?.let { plan ->
+            paint.color = TEXT
+            paint.typeface = android.graphics.Typeface.DEFAULT_BOLD
+            paint.textSize = max(axisText, 13f * scaledDensity)
+            paint.textAlign = Paint.Align.CENTER
+            val day = plan.start.format(DateTimeFormatter.ofPattern("EEE", Locale.forLanguageTag("sv-SE")))
+            val start = plan.start.format(DateTimeFormatter.ofPattern("HH:mm"))
+            val end = plan.end.format(DateTimeFormatter.ofPattern("HH:mm"))
+            val chargingText = "Ladda $day $start–$end · %.1f kWh".format(plan.energyKwh)
+            val chargingTextWithRange = "$chargingText · %.1f mil".format(plan.distanceMil)
+            val footerText = if (paint.measureText(chargingTextWithRange) <= right - left) chargingTextWithRange else chargingText
+            canvas.drawText(footerText, (left + right) / 2f, h - pad * .7f, paint)
+            paint.textAlign = Paint.Align.LEFT
+        }
         return bitmap
     }
 

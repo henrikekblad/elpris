@@ -7,9 +7,16 @@ data class WidgetSettings(
     val vat: Boolean = false,
     val tax: Boolean = false,
     val transfer: Boolean = false,
-    val taxOre: Double = 0.0,
-    val transferOre: Double = 0.0,
-    val intervalMinutes: Int = 15
+    val taxOre: Double = DEFAULT_TAX_ORE,
+    val transferOre: Double = DEFAULT_TRANSFER_ORE,
+    val intervalMinutes: Int = 15,
+    val chargingAmps: Int = 10,
+    val consumptionKwhPerMil: Double = 2.0,
+    val chargingKwh: Int = 20,
+    val showChargingPlan: Boolean = false,
+    val useDepartureTime: Boolean = true,
+    val departureHour: Int = 8,
+    val departureMinute: Int = 0
 ) {
     fun apply(rawSek: Double): Double {
         var ore = rawSek * 100.0
@@ -20,6 +27,8 @@ data class WidgetSettings(
     }
 
     companion object {
+        const val DEFAULT_TAX_ORE = 36.0
+        const val DEFAULT_TRANSFER_ORE = 30.0
         private const val PREFS = "widget_settings"
         fun load(context: Context, id: Int): WidgetSettings {
             val p = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -29,9 +38,16 @@ data class WidgetSettings(
                 vat = p.getBoolean(key + "vat", false),
                 tax = p.getBoolean(key + "tax", false),
                 transfer = p.getBoolean(key + "transfer", false),
-                taxOre = p.getString(key + "taxOre", "0")?.toDoubleOrNull() ?: 0.0,
-                transferOre = p.getString(key + "transferOre", "0")?.toDoubleOrNull() ?: 0.0,
-                intervalMinutes = p.getInt(key + "intervalMinutes", 15)
+                taxOre = p.getString(key + "taxOre", DEFAULT_TAX_ORE.toString())?.toDoubleOrNull() ?: DEFAULT_TAX_ORE,
+                transferOre = p.getString(key + "transferOre", DEFAULT_TRANSFER_ORE.toString())?.toDoubleOrNull() ?: DEFAULT_TRANSFER_ORE,
+                intervalMinutes = p.getInt(key + "intervalMinutes", 15),
+                chargingAmps = p.getInt(key + "chargingAmps", 10),
+                consumptionKwhPerMil = p.getString(key + "consumptionKwhPerMil", "2.0")?.toDoubleOrNull() ?: 2.0,
+                chargingKwh = p.getInt(key + "chargingKwh", 20),
+                showChargingPlan = p.getBoolean(key + "showChargingPlan", false),
+                useDepartureTime = p.getBoolean(key + "useDepartureTime", true),
+                departureHour = p.getInt(key + "departureHour", 8),
+                departureMinute = p.getInt(key + "departureMinute", 0)
             )
         }
 
@@ -45,12 +61,22 @@ data class WidgetSettings(
                 .putString(key + "taxOre", value.taxOre.toString())
                 .putString(key + "transferOre", value.transferOre.toString())
                 .putInt(key + "intervalMinutes", value.intervalMinutes)
+                .putInt(key + "chargingAmps", value.chargingAmps)
+                .putString(key + "consumptionKwhPerMil", value.consumptionKwhPerMil.toString())
+                .putInt(key + "chargingKwh", value.chargingKwh)
+                .putBoolean(key + "showChargingPlan", value.showChargingPlan)
+                .putBoolean(key + "useDepartureTime", value.useDepartureTime)
+                .putInt(key + "departureHour", value.departureHour)
+                .putInt(key + "departureMinute", value.departureMinute)
                 .apply()
         }
 
         fun delete(context: Context, id: Int) {
             val editor = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-            listOf("area", "vat", "tax", "transfer", "taxOre", "transferOre", "intervalMinutes")
+            listOf("area", "vat", "tax", "transfer", "taxOre", "transferOre", "intervalMinutes",
+                "chargingAmps", "consumptionKwhPerMil", "chargingKwh", "showChargingPlan")
+                .forEach { editor.remove("$id.$it") }
+            listOf("useDepartureTime", "departureHour", "departureMinute")
                 .forEach { editor.remove("$id.$it") }
             editor.apply()
         }
