@@ -5,7 +5,7 @@
 Elpris is a configurable Android home-screen widget that displays today's and tomorrow's electricity spot prices on the same 24-hour chart. It supports Sweden, Norway, Denmark and Finland and is available in Swedish, Norwegian, Danish, Finnish and English.
 
 <p align="center">
-  <img src="assets/widget.jpg" alt="Elpris widget showing today's and tomorrow's electricity prices" width="720">
+  <img src="assets/widget_en.jpg" alt="Elpris widget showing today's and tomorrow's electricity prices" width="720">
 </p>
 
 ## Features
@@ -24,9 +24,9 @@ Elpris is a configurable Android home-screen widget that displays today's and to
 - Automatic publication checks for tomorrow's prices.
 
 <p align="center">
-  <img src="assets/table.jpg" alt="Colour-coded electricity price table" width="360">
+  <img src="assets/table_en.jpg" alt="Colour-coded electricity price table" width="360">
   &nbsp;&nbsp;
-  <img src="assets/settings.jpg" alt="Price-area, tax and display settings" width="360">
+  <img src="assets/settings_en.jpg" alt="Price-area, tax and display settings" width="360">
 </p>
 
 ## Installation
@@ -43,7 +43,7 @@ Choose single-phase or three-phase charging (6–16 A), vehicle consumption, ene
 If charging extends beyond the published prices, missing intervals are estimated from the latest published daily price profile and the result is clearly marked as estimated. Calculations use ideal power at 230 V single phase or 400 V three phase; actual charging losses and the vehicle's charging curve are not included.
 
 <p align="center">
-  <img src="assets/charge.jpg" alt="EV charging planner" width="360">
+  <img src="assets/charge_en.jpg" alt="EV charging planner" width="360">
 </p>
 
 ## Price data and calculation

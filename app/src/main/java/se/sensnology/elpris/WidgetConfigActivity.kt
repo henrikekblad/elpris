@@ -217,8 +217,8 @@ class WidgetConfigActivity : Activity() {
             typeface = Typeface.DEFAULT
         })
         val phases = RadioGroup(this).apply { orientation = RadioGroup.HORIZONTAL }
-        val onePhase = RadioButton(this).apply { id = 1; text = "1-fas"; isChecked = settings.chargingPhases == 1 }
-        val threePhase = RadioButton(this).apply { id = 3; text = "3-fas"; isChecked = settings.chargingPhases != 1 }
+        val onePhase = RadioButton(this).apply { id = 1; text = t("phase_one"); isChecked = settings.chargingPhases == 1 }
+        val threePhase = RadioButton(this).apply { id = 3; text = t("phase_three"); isChecked = settings.chargingPhases != 1 }
         phases.addView(onePhase); phases.addView(threePhase); content.addView(phases)
         val ampsValue = valueLabel()
         val amps = slider(t("charge_current"), 6, 16, settings.chargingAmps, ampsValue) { value ->
@@ -294,7 +294,7 @@ class WidgetConfigActivity : Activity() {
                 energyResultValue.text = "%.1f kWh".format(plan.energyKwh)
                 distanceValue.text = if (AppLanguageSettings.language(this) in setOf("sv", "nb")) "${t("approximately")} %.1f mil".format(plan.distanceMil)
                     else "${t("approximately")} %.0f km".format(plan.distanceMil * 10)
-                powerValue.text = "%.1f kW (%d-fas)".format(plan.powerKw, settings.chargingPhases)
+                powerValue.text = tf("power_phase", plan.powerKw, if (settings.chargingPhases == 1) t("phase_one") else t("phase_three"))
                 resultNote.text = when {
                     estimated -> td("estimated_note").format(plan.estimatedPriceSlots)
                     else -> ""

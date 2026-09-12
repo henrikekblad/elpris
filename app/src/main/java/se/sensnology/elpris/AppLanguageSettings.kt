@@ -80,6 +80,7 @@ object AppLanguageSettings {
             "country_SE" to "Sverige", "country_NO" to "Norge", "country_DK" to "Danmark", "country_FI" to "Finland",
             "today" to "Idag", "tomorrow" to "Imorgon", "time" to "Tid", "no_prices" to "Inga priser kunde hämtas.",
             "connection" to "Anslutning", "charge_current" to "Laddström", "consumption" to "Förbrukning", "charging" to "Laddning",
+            "phase_one" to "1-fas", "phase_three" to "3-fas", "power_phase" to "%.1f kW (%s)",
             "cost" to "Kostnad", "range" to "Räckvidd", "power" to "Effekt", "departure_check" to "Laddningen ska vara klar före avresa",
             "departure" to "Avresa %s", "widget_plan" to "Visa rekommenderad laddtid underst i widgeten", "estimated" to "uppskattad",
             "approximately" to "cirka", "charge" to "Ladda", "could_not_fetch" to "Kunde inte hämta priser", "choose_widget" to "Välj vilken widget du vill öppna"
@@ -92,6 +93,7 @@ object AppLanguageSettings {
             "save" to "Lagre og oppdater", "country_SE" to "Sverige", "country_NO" to "Norge", "country_DK" to "Danmark", "country_FI" to "Finland",
             "today" to "I dag", "tomorrow" to "I morgen", "time" to "Tid", "no_prices" to "Kunne ikke hente priser.", "connection" to "Tilkobling",
             "charge_current" to "Ladestrøm", "consumption" to "Forbruk", "charging" to "Lading", "cost" to "Kostnad", "range" to "Rekkevidde",
+            "phase_one" to "1-fase", "phase_three" to "3-fase", "power_phase" to "%.1f kW (%s)",
             "power" to "Effekt", "departure_check" to "Ladingen skal være ferdig før avreise", "departure" to "Avreise %s",
             "widget_plan" to "Vis anbefalt ladetid nederst i widgeten", "estimated" to "estimert", "approximately" to "cirka", "charge" to "Lad",
             "could_not_fetch" to "Kunne ikke hente priser", "choose_widget" to "Velg hvilken widget du vil åpne"
@@ -104,6 +106,7 @@ object AppLanguageSettings {
             "save" to "Gem og opdater", "country_SE" to "Sverige", "country_NO" to "Norge", "country_DK" to "Danmark", "country_FI" to "Finland",
             "today" to "I dag", "tomorrow" to "I morgen", "time" to "Tid", "no_prices" to "Priserne kunne ikke hentes.", "connection" to "Tilslutning",
             "charge_current" to "Ladestrøm", "consumption" to "Forbrug", "charging" to "Opladning", "cost" to "Pris", "range" to "Rækkevidde",
+            "phase_one" to "1-faset", "phase_three" to "3-faset", "power_phase" to "%.1f kW (%s)",
             "power" to "Effekt", "departure_check" to "Opladningen skal være færdig før afgang", "departure" to "Afgang %s",
             "widget_plan" to "Vis anbefalet ladetid nederst i widgeten", "estimated" to "estimeret", "approximately" to "cirka", "charge" to "Oplad",
             "could_not_fetch" to "Priserne kunne ikke hentes", "choose_widget" to "Vælg den widget, du vil åbne"
@@ -116,6 +119,7 @@ object AppLanguageSettings {
             "save" to "Tallenna ja päivitä", "country_SE" to "Ruotsi", "country_NO" to "Norja", "country_DK" to "Tanska", "country_FI" to "Suomi",
             "today" to "Tänään", "tomorrow" to "Huomenna", "time" to "Aika", "no_prices" to "Hintoja ei voitu hakea.", "connection" to "Liitäntä",
             "charge_current" to "Latausvirta", "consumption" to "Kulutus", "charging" to "Lataus", "cost" to "Hinta", "range" to "Toimintamatka",
+            "phase_one" to "1-vaihe", "phase_three" to "3-vaihe", "power_phase" to "%.1f kW (%s)",
             "power" to "Teho", "departure_check" to "Latauksen on valmistuttava ennen lähtöä", "departure" to "Lähtö %s",
             "widget_plan" to "Näytä suositeltu latausaika widgetissä", "estimated" to "arvioitu", "approximately" to "noin", "charge" to "Lataa",
             "could_not_fetch" to "Hintoja ei voitu hakea", "choose_widget" to "Valitse avattava widget"
@@ -128,6 +132,7 @@ object AppLanguageSettings {
             "save" to "Save and update", "country_SE" to "Sweden", "country_NO" to "Norway", "country_DK" to "Denmark", "country_FI" to "Finland",
             "today" to "Today", "tomorrow" to "Tomorrow", "time" to "Time", "no_prices" to "Prices could not be loaded.", "connection" to "Connection",
             "charge_current" to "Charging current", "consumption" to "Consumption", "charging" to "Charging", "cost" to "Cost", "range" to "Range",
+            "phase_one" to "Single phase", "phase_three" to "Three phase", "power_phase" to "%.1f kW (%s)",
             "power" to "Power", "departure_check" to "Charging must finish before departure", "departure" to "Departure %s",
             "widget_plan" to "Show recommended charging time in the widget", "estimated" to "estimated", "approximately" to "about", "charge" to "Charge",
             "could_not_fetch" to "Could not load prices", "choose_widget" to "Choose which widget to open"
