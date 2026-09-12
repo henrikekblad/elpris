@@ -26,18 +26,18 @@ class PriceWidgetProvider : AppWidgetProvider() {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
             PriceUpdateScheduler.scheduleNext(context, tomorrowAvailable = false)
         } else if (intent.action == ACTION_PUBLICATION_CHECK) {
-            // Planera efterföljande försök direkt. Nätverksresultatet nedan flyttar
-            // alarmet till nästa dag om priserna redan har publicerats.
+            // Schedule the next attempt immediately. The network result below moves
+            // the alarm to the next day when tomorrow's prices are already available.
             PriceUpdateScheduler.scheduleNext(context, tomorrowAvailable = false)
             val manager = AppWidgetManager.getInstance(context)
             val component = android.content.ComponentName(context, PriceWidgetProvider::class.java)
             val ids = manager.getAppWidgetIds(component)
             val result = goAsync()
-            ids.forEachIndexed { index, id -> update(context, manager, id, if (index == ids.lastIndex) result else null) }
+            ids.forEachIndexed { index, id -> update(context, manager, id, if (index == ids.lastIndex) result else null, forceRefresh = true) }
             if (ids.isEmpty()) result.finish()
         } else if (intent.action == ACTION_REFRESH) {
             val id = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
-            if (id != AppWidgetManager.INVALID_APPWIDGET_ID) update(context, AppWidgetManager.getInstance(context), id, goAsync())
+            if (id != AppWidgetManager.INVALID_APPWIDGET_ID) update(context, AppWidgetManager.getInstance(context), id, goAsync(), forceRefresh = true)
         }
     }
 
@@ -56,13 +56,12 @@ class PriceWidgetProvider : AppWidgetProvider() {
         const val ACTION_PUBLICATION_CHECK = "se.sensnology.elpris.PUBLICATION_CHECK"
         private val executor = Executors.newSingleThreadExecutor()
 
-        fun update(context: Context, manager: AppWidgetManager, id: Int, pending: PendingResult? = null) {
+        fun update(context: Context, manager: AppWidgetManager, id: Int, pending: PendingResult? = null, forceRefresh: Boolean = false) {
             executor.execute {
                 try {
                     val settings = WidgetSettings.load(context, id)
                     Log.i("ElprisWidget", "Update start widget=$id area=${settings.area}")
-                    val data = PriceRepository.load(context, settings.area)
-                    PriceUpdateScheduler.scheduleNext(context, data.tomorrow.isNotEmpty())
+                    val data = PriceRepository.load(context, settings.area, forceRefresh)
                     val options = manager.getAppWidgetOptions(id)
                     val density = context.resources.displayMetrics.density
                     val width = (options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, 320) * density).toInt()
@@ -77,6 +76,7 @@ class PriceWidgetProvider : AppWidgetProvider() {
                     val openIntent = PendingIntent.getActivity(context, id, openApp, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                     views.setOnClickPendingIntent(R.id.widget_root, openIntent)
                     manager.updateAppWidget(id, views)
+                    PriceUpdateScheduler.scheduleForActiveWidgets(context)
                     Log.i("ElprisWidget", "Update complete widget=$id today=${data.today.size} tomorrow=${data.tomorrow.size}")
                 } finally { pending?.finish() }
             }

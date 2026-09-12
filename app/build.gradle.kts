@@ -15,13 +15,14 @@ android {
     namespace = "se.sensnology.elpris"
     compileSdk = 36
     buildFeatures { buildConfig = true }
+    bundle { language { enableSplit = false } }
 
     defaultConfig {
         applicationId = "se.sensnology.elpris"
         minSdk = 26
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.3.1"
+        versionCode = 5
+        versionName = "1.3.2"
     }
 
     if (hasReleaseSigning) {
@@ -44,3 +45,8 @@ android {
 }
 
 kotlin { jvmToolchain(17) }
+
+dependencies {
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20260814")
+}

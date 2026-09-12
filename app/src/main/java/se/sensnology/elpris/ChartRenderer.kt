@@ -29,20 +29,20 @@ object ChartRenderer {
         canvas.drawRoundRect(RectF(0f, 0f, w.toFloat(), h.toFloat()), 22f, 22f, paint)
         val scale = min(w / 420f, h / 220f).coerceIn(.72f, 1.45f)
         val pad = 14f * scale
-        // Canvasen kan vara betydligt större än widgetens logiska dp-storlek.
-        // Storlekar baserade på bildhöjden förblir läsbara efter launcherns skalning.
-        val today = aggregate(result.today, settings).map { it.first to settings.apply(it.second) }
-        val tomorrow = aggregate(result.tomorrow, settings).map { it.first to settings.apply(it.second) }
+        // The canvas can be considerably larger than the widget's logical dp size.
+        // Sizes based on image height remain readable after launcher scaling.
+        val today = PriceAggregation.aggregate(result.today, settings).map { it.first to settings.apply(it.second) }
+        val tomorrow = PriceAggregation.aggregate(result.tomorrow, settings).map { it.first to settings.apply(it.second) }
         val allValues = (today + tomorrow).map { it.second }
         if (allValues.isEmpty()) {
             paint.typeface = android.graphics.Typeface.DEFAULT
             paint.textSize = 12f * scale
             paint.color = MUTED
-            canvas.drawText(AppLanguageSettings.text(context, "could_not_fetch"), pad, h / 2f, paint)
+            canvas.drawText(AppLanguageSettings.text(context, R.string.could_not_fetch), pad, h / 2f, paint)
             return bitmap
         }
 
-        val now = OffsetDateTime.now()
+        val now = OffsetDateTime.now(PriceMarkets.find(settings.area).zoneId)
         val chargingPlan = if (settings.showChargingPlan) ChargingPlanner.calculate(result, settings, now) else null
         val current = today.lastOrNull { it.first <= now }?.second
         val dayMax = today.maxOfOrNull { it.second }
@@ -56,7 +56,7 @@ object ChartRenderer {
         paint.typeface = android.graphics.Typeface.DEFAULT_BOLD
         paint.textSize = desiredHeader
         val requiredWidth = paint.measureText(maxText) + paint.measureText(minText) + paint.measureText(currentText) + pad * 5
-        // Samma storlek oavsett widgetmått; krymp bara som nödlösning för att undvika överlappning.
+        // Keep the same size across widget dimensions; shrink only as a last resort to avoid overlap.
         val headerSize = if (requiredWidth > w) max(14f * scaledDensity, desiredHeader * w / requiredWidth) else desiredHeader
         paint.textSize = headerSize
         paint.color = EXPENSIVE
@@ -99,7 +99,7 @@ object ChartRenderer {
         }
         paint.textAlign = Paint.Align.LEFT
 
-        // Morgondagen ritas först och fungerar som en neutral jämförelse bakom idag.
+        // Draw tomorrow first as a neutral comparison behind today's prices.
         drawTomorrow(canvas, paint, tomorrow, ::x, ::y, scale)
         drawToday(canvas, paint, today, ::x, ::y, scale, now)
 
@@ -123,8 +123,8 @@ object ChartRenderer {
                 if (plan.start.toLocalDate() == plan.end.toLocalDate()) "HH:mm" else "EEE HH:mm",
                 locale
             ))
-            val estimate = if (plan.estimatedPriceSlots > 0) "${AppLanguageSettings.text(context, "estimated")} · " else ""
-            val chargingText = "$estimate${AppLanguageSettings.text(context, "charge")} $day $start–$end · %.1f kWh".format(plan.energyKwh)
+            val estimate = if (plan.estimatedPriceSlots > 0) "${AppLanguageSettings.text(context, R.string.estimated)} · " else ""
+            val chargingText = "$estimate${AppLanguageSettings.text(context, R.string.charge)} $day $start–$end · %.1f kWh".format(plan.energyKwh)
             val rangeText = if (AppLanguageSettings.language(context) in setOf("sv", "nb")) "%.1f mil".format(plan.distanceMil)
                 else "%.0f km".format(plan.distanceMil * 10)
             val chargingTextWithRange = "$chargingText · $rangeText"
@@ -162,10 +162,4 @@ object ChartRenderer {
         paint.alpha = 255
     }
 
-    fun aggregate(points: List<PricePoint>, settings: WidgetSettings): List<Pair<OffsetDateTime, Double>> {
-        if (settings.intervalMinutes == 15) return points.map { it.start to it.sekPerKwh }
-        return points.groupBy { it.start.toLocalDate() to it.start.hour }
-            .values.map { group -> group.first().start.withMinute(0) to group.map { it.sekPerKwh }.average() }
-            .sortedBy { it.first }
-    }
 }

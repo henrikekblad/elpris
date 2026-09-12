@@ -1,4 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="app_name">Elpris</string>
-    <string name="widget_description">Dagens och morgondagens elpriser</string>
+  <string name="app_name">Elpris</string>
+  <string name="widget_description">Electricity prices today and tomorrow</string>
+  <string name="app_title">Electricity price</string>
+  <string name="settings">Settings</string>
+  <string name="table">Price table</string>
+  <string name="ev">EV</string>
+  <string name="language">Language</string>
+  <string name="area">Price area</string>
+  <string name="theme">Colour theme</string>
+  <string name="system">System default</string>
+  <string name="light">Light</string>
+  <string name="dark">Dark</string>
+  <string name="resolution">Resolution</string>
+  <string name="quarter">15 minutes</string>
+  <string name="hour">Hourly average</string>
+  <string name="vat">Add %1$s %% VAT</string>
+  <string name="vat_zero">VAT (0 %% in %1$s)</string>
+  <string name="tax">Add electricity tax</string>
+  <string name="transfer">Add grid fee</string>
+  <string name="tax_hint">Electricity tax, %1$s/kWh</string>
+  <string name="transfer_hint">Grid fee, %1$s/kWh</string>
+  <string name="save">Save and update</string>
+  <string name="country_se">Sweden</string>
+  <string name="country_no">Norway</string>
+  <string name="country_dk">Denmark</string>
+  <string name="country_fi">Finland</string>
+  <string name="today">Today</string>
+  <string name="tomorrow">Tomorrow</string>
+  <string name="time">Time</string>
+  <string name="no_prices">Prices could not be loaded.</string>
+  <string name="connection">Connection</string>
+  <string name="charge_current">Charging current</string>
+  <string name="consumption">Consumption</string>
+  <string name="charging">Charging</string>
+  <string name="phase_one">Single phase</string>
+  <string name="phase_three">Three phase</string>
+  <string name="power_phase">%1$.1f kW (%2$s)</string>
+  <string name="cost">Cost</string>
+  <string name="range">Range</string>
+  <string name="power">Power</string>
+  <string name="departure_check">Charging must finish before departure</string>
+  <string name="departure">Departure %1$s</string>
+  <string name="widget_plan">Show recommended charging time in the widget</string>
+  <string name="estimated">estimated</string>
+  <string name="approximately">about</string>
+  <string name="charge">Charge</string>
+  <string name="could_not_fetch">Could not load prices</string>
+  <string name="choose_widget">Choose which widget to open</string>
+  <string name="updated">Widget is updating</string>
+  <string name="saved">Saved</string>
+  <string name="saved_updated">Saved; widget is updating</string>
+  <string name="planner_intro">Find the cheapest continuous charging period during the next 24 hours.</string>
+  <string name="misses_departure">Cannot finish before departure</string>
+  <string name="no_plan">No charging period can be calculated</string>
+  <string name="not_enough_prices">There is not enough price data to calculate a charging period.</string>
+  <plurals name="estimated_note">
+    <item quantity="one">The cost includes %1$d estimated quarter-hour value based on the latest published daily price profile.</item>
+    <item quantity="other">The cost includes %1$d estimated quarter-hour values based on the latest published daily price profile.</item>
+  </plurals>
+  <string name="prices_for">Prices for %1$s</string>
+  <string name="market_info">The API price is the spot price without VAT, taxes or fees. Suggested 2026 values: %1$s %2$s/kWh electricity tax and %3$s %2$s/kWh grid fee, excluding VAT. Amounts vary – check local rules and your grid agreement. VAT is applied last to the entire amount.</string>
+  <plurals name="duration_hours">
+    <item quantity="one">%1$d hour</item>
+    <item quantity="other">%1$d hours</item>
+  </plurals>
+  <string name="duration_hours_minutes">%1$d h %2$d min</string>
+  <string name="charging_too_long">Charging takes about %1$s. Reduce the energy, increase the current or disable the departure time to plan across multiple days.</string>
+  <string name="table_title">%1$s · %2$d-minute prices · %3$s</string>
+  <string name="widget_choice">Widget %1$d · %2$s · %3$d min</string>
+  <string name="amps_power" translatable="false">%1$d A · %2$.1f kW</string>
+  <string name="consumption_value" translatable="false">%1$.1f kWh/10 km</string>
+  <string name="energy_value" translatable="false">%1$.1f kWh</string>
+  <string name="energy_value_integer" translatable="false">%1$d kWh</string>
+  <string name="charging_window" translatable="false">%1$s  –  %2$s</string>
+  <string name="language_system">System default</string>
+  <string name="language_swedish">Svenska</string>
+  <string name="language_norwegian">Norsk</string>
+  <string name="language_danish">Dansk</string>
+  <string name="language_finnish">Suomi</string>
+  <string name="language_english">English</string>
 </resources>

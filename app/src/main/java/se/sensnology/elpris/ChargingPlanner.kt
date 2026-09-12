@@ -12,7 +12,7 @@ data class ChargingPlan(
     val powerKw: Double,
     val energyKwh: Double,
     val distanceMil: Double,
-    val estimatedCostSek: Double,
+    val estimatedCost: Double,
     val estimatedPriceSlots: Int
 )
 
@@ -72,7 +72,7 @@ object ChargingPlanner {
                     add(PlanningPoint(actual, false))
                 } else {
                     val fallback = fallbackByTime[LocalTime.of(time.hour, time.minute)] ?: return@buildList
-                    add(PlanningPoint(PricePoint(time, fallback.sekPerKwh), true))
+                    add(PlanningPoint(PricePoint(time, fallback.spotPricePerKwh), true))
                 }
                 time = time.plusMinutes(slotMinutes)
             }
@@ -91,7 +91,7 @@ object ChargingPlanner {
             if (departure != null && slice.last().point.start.plusMinutes(slotMinutes) > departure) continue
             var costOre = 0.0
             slice.forEach { point ->
-                costOre += energyPerSlot * settings.apply(point.point.sekPerKwh)
+                costOre += energyPerSlot * settings.apply(point.point.spotPricePerKwh)
             }
             if (costOre < bestCost) { bestCost = costOre; bestIndex = startIndex }
         }

@@ -4,27 +4,31 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.util.Log
 import java.time.ZonedDateTime
 
 /**
- * Kompletterar AppWidgetProviders vanliga 30-minutersintervall kring publiceringen.
- * Alarmen är avsiktligt inexakta för att inte kräva behörigheten för exakta alarm.
+ * Supplements AppWidgetProvider's regular 30-minute interval around publication time.
+ * Alarms are intentionally inexact to avoid requiring exact-alarm permission.
  */
 object PriceUpdateScheduler {
     private val publicationAttempts = listOf(0, 10, 20, 35)
     private const val REQUEST_CODE = 13_035
 
     fun scheduleNext(context: Context, tomorrowAvailable: Boolean) {
-        val now = ZonedDateTime.now()
-        val next = if (tomorrowAvailable) {
-            nextDayAtOne(now)
-        } else {
-            nextAttempt(now)
-        }
+        val manager = AppWidgetManager.getInstance(context)
+        val ids = manager.getAppWidgetIds(ComponentName(context, PriceWidgetProvider::class.java))
+        val markets = ids.map { WidgetSettings.load(context, it).area }.distinct()
+            .map(PriceMarkets::find).ifEmpty { listOf(PriceMarkets.find(PriceMarkets.defaultArea(AppLanguageSettings.region(context)))) }
+        val next = markets.map { market ->
+            val now = ZonedDateTime.now(market.zoneId)
+            if (tomorrowAvailable) nextDayAtOne(now) else nextAttempt(now)
+        }.minBy { it.toInstant() }
         val alarm = context.getSystemService(AlarmManager::class.java)
-        // Fem minuters fönster ger Android möjlighet att samordna väckningar utan
-        // att kontrollerna driver långt bort från publiceringstiden.
+        // A five-minute window lets Android coordinate wake-ups without allowing
+        // the checks to drift too far from publication time.
         alarm.setWindow(
             AlarmManager.RTC_WAKEUP,
             next.toInstant().toEpochMilli(),
@@ -32,6 +36,13 @@ object PriceUpdateScheduler {
             pendingIntent(context)
         )
         Log.i("ElprisScheduler", "Next publication check ${next.toLocalDateTime()} available=$tomorrowAvailable")
+    }
+
+    fun scheduleForActiveWidgets(context: Context) {
+        val manager = AppWidgetManager.getInstance(context)
+        val ids = manager.getAppWidgetIds(ComponentName(context, PriceWidgetProvider::class.java))
+        val areas = ids.map { WidgetSettings.load(context, it).area }.distinct()
+        scheduleNext(context, areas.isNotEmpty() && areas.all { PriceRepository.hasCachedTomorrow(context, it) })
     }
 
     fun cancel(context: Context) {
@@ -44,8 +55,8 @@ object PriceUpdateScheduler {
             val candidate = todayAt13.plusMinutes(minutes.toLong())
             if (candidate.isAfter(now)) return candidate
         }
-        // Efter de täta publiceringsförsöken fortsätter vi var 30:e minut
-        // tills ett faktiskt morgondagsdygn har sparats.
+        // After the initial frequent publication attempts, retry every 30 minutes
+        // until a complete set of tomorrow's prices has been stored.
         return now.plusMinutes(30).withSecond(0).withNano(0)
     }
 

@@ -41,11 +41,11 @@ class LauncherActivity : Activity() {
             addView(ImageView(this@LauncherActivity).apply { setImageResource(R.drawable.app_icon) },
                 LinearLayout.LayoutParams(dp(38), dp(38)).apply { marginEnd = dp(10) })
             addView(TextView(this@LauncherActivity).apply {
-                text = AppLanguageSettings.text(this@LauncherActivity, "app_title"); textSize = 27f; setTextColor(textColor)
+                text = AppLanguageSettings.text(this@LauncherActivity, R.string.app_title); textSize = 27f; setTextColor(textColor)
             })
         }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
         root.addView(TextView(this).apply {
-            text = AppLanguageSettings.text(this@LauncherActivity, "choose_widget")
+            text = AppLanguageSettings.text(this@LauncherActivity, R.string.choose_widget)
             textSize = 16f
             setTextColor(mutedColor)
             setPadding(0, dp(12), 0, dp(12))
@@ -53,7 +53,7 @@ class LauncherActivity : Activity() {
         ids.forEachIndexed { index, id ->
             val settings = WidgetSettings.load(this, id)
             root.addView(Button(this).apply {
-                text = "Widget ${index + 1} · ${settings.area} · ${settings.intervalMinutes} min"
+                text = AppLanguageSettings.text(this@LauncherActivity, R.string.widget_choice, index + 1, settings.area, settings.intervalMinutes)
                 isAllCaps = false
                 textSize = 16f
                 gravity = Gravity.CENTER_VERTICAL

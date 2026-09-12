@@ -8,6 +8,9 @@
     android:minResizeWidth="110dp"
     android:minResizeHeight="80dp"
     android:previewImage="@drawable/widget_preview"
+    android:previewLayout="@layout/widget_preview"
     android:resizeMode="horizontal|vertical"
+    android:targetCellWidth="4"
+    android:targetCellHeight="2"
     android:updatePeriodMillis="1800000"
     android:widgetCategory="home_screen" />

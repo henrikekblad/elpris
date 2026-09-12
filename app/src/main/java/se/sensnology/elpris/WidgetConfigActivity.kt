@@ -30,6 +30,8 @@ class WidgetConfigActivity : Activity() {
     private var appBackground = 0xFFF6F7FB.toInt()
     private var cardBackground = 0xFFE7EEF6.toInt()
     private val tabs = mutableListOf<Pair<TextView, View>>()
+    private val ioExecutor = Executors.newSingleThreadExecutor()
+    private var viewGeneration = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AppThemeSettings.apply(this)
@@ -51,13 +53,13 @@ class WidgetConfigActivity : Activity() {
                 setImageResource(R.drawable.app_icon); contentDescription = "Elpris"
             }, LinearLayout.LayoutParams(dp(38), dp(38)).apply { marginEnd = dp(10) })
             addView(TextView(this@WidgetConfigActivity).apply {
-                text = t("app_title"); textSize = 27f; setTextColor(dark); typeface = Typeface.DEFAULT_BOLD
+                text = t(R.string.app_title); textSize = 27f; setTextColor(dark); typeface = Typeface.DEFAULT_BOLD
             })
         }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
         val tabBar = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, dp(12), 0, dp(8)) }
-        tabBar.addView(tab(t("settings")) { showSettings(editing); selectTab(0) }, weight())
-        tabBar.addView(tab(t("table")) { showTable(); selectTab(1) }, weight())
-        tabBar.addView(tab(t("ev")) { showCharging(); selectTab(2) }, weight())
+        tabBar.addView(tab(t(R.string.settings)) { showSettings(editing); selectTab(0) }, weight())
+        tabBar.addView(tab(t(R.string.table)) { showTable(); selectTab(1) }, weight())
+        tabBar.addView(tab(t(R.string.ev)) { showCharging(); selectTab(2) }, weight())
         root.addView(tabBar)
         content = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         scrollView = ScrollView(this).apply { addView(content) }
@@ -68,13 +70,14 @@ class WidgetConfigActivity : Activity() {
     }
 
     private fun showSettings(editing: Boolean) {
+        viewGeneration++
         scrollView.setOnScrollChangeListener(null as View.OnScrollChangeListener?)
         content.removeAllViews()
         val old = WidgetSettings.load(this, widgetId)
-        content.addView(label(t("language")))
+        content.addView(label(t(R.string.language)))
         val language = Spinner(this).apply {
             adapter = ArrayAdapter(this@WidgetConfigActivity, android.R.layout.simple_spinner_dropdown_item,
-                AppLanguageSettings.choices.map { it.label })
+                AppLanguageSettings.choices.map { t(it.label) })
             setSelection(AppLanguageSettings.choices.indexOfFirst { it.code == AppLanguageSettings.selected(this@WidgetConfigActivity) }.coerceAtLeast(0))
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onNothingSelected(parent: AdapterView<*>?) = Unit
@@ -88,15 +91,18 @@ class WidgetConfigActivity : Activity() {
             }
         }
         content.addView(language)
-        content.addView(label(t("area")))
+        content.addView(label(t(R.string.area)))
         data class AreaChoice(val label: String, val code: String? = null) {
             override fun toString() = label
         }
         val region = AppLanguageSettings.region(this)
         val areaChoices = buildList {
             PriceMarkets.groupedWithPreferredFirst(region).forEach { (country, markets) ->
-                val countryCode = when (country) { "Norge" -> "NO"; "Danmark" -> "DK"; "Finland" -> "FI"; else -> "SE" }
-                add(AreaChoice(t("country_$countryCode")))
+                val countryName = when (country) {
+                    MarketCountry.NO -> t(R.string.country_no); MarketCountry.DK -> t(R.string.country_dk)
+                    MarketCountry.FI -> t(R.string.country_fi); MarketCountry.SE -> t(R.string.country_se)
+                }
+                add(AreaChoice(countryName))
                 markets.forEach { add(AreaChoice(it.selectorLabel, it.area)) }
             }
         }
@@ -116,11 +122,11 @@ class WidgetConfigActivity : Activity() {
                 ?: areaChoices.indexOfFirst { it.code == "SE4" })
         }
         content.addView(area)
-        content.addView(label(t("theme")))
+        content.addView(label(t(R.string.theme)))
         val themeModes = listOf(AppThemeSettings.SYSTEM, AppThemeSettings.LIGHT, AppThemeSettings.DARK)
         val theme = Spinner(this).apply {
             adapter = ArrayAdapter(this@WidgetConfigActivity, android.R.layout.simple_spinner_dropdown_item,
-                listOf(t("system"), t("light"), t("dark")))
+                listOf(t(R.string.system), t(R.string.light), t(R.string.dark)))
             setSelection(themeModes.indexOf(AppThemeSettings.mode(this@WidgetConfigActivity)).coerceAtLeast(0))
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onNothingSelected(parent: AdapterView<*>?) = Unit
@@ -134,38 +140,42 @@ class WidgetConfigActivity : Activity() {
             }
         }
         content.addView(theme)
-        content.addView(label(t("resolution")))
+        content.addView(label(t(R.string.resolution)))
         val interval = RadioGroup(this).apply { orientation = RadioGroup.HORIZONTAL }
-        val quarter = RadioButton(this).apply { id = 15; text = t("quarter"); isChecked = old.intervalMinutes == 15 }
-        val hour = RadioButton(this).apply { id = 60; text = t("hour"); isChecked = old.intervalMinutes == 60 }
+        val quarterText = t(R.string.quarter)
+        val hourText = t(R.string.hour)
+        val quarterId = View.generateViewId()
+        val hourId = View.generateViewId()
+        val quarter = RadioButton(this).apply { id = quarterId; text = quarterText; isChecked = old.intervalMinutes == 15 }
+        val hour = RadioButton(this).apply { id = hourId; text = hourText; isChecked = old.intervalMinutes == 60 }
         interval.addView(quarter); interval.addView(hour); content.addView(interval)
         val priceInfo = TextView(this).apply {
             textSize = 13f; setTextColor(muted); setPadding(0, dp(14), 0, dp(8))
         }
         content.addView(priceInfo)
-        val vat = checkbox(t("vat"), old.vat)
-        val tax = checkbox(t("tax"), old.tax)
-        val taxValue = numberField(old.taxOre, tf("tax_hint", "öre"))
-        val transfer = checkbox(t("transfer"), old.transfer)
-        val transferValue = numberField(old.transferOre, tf("transfer_hint", "öre"))
+        val vat = checkbox(t(R.string.vat, "25"), old.vat)
+        val tax = checkbox(t(R.string.tax), old.tax)
+        val taxValue = numberField(old.taxMinorUnit, t(R.string.tax_hint, "öre"))
+        val transfer = checkbox(t(R.string.transfer), old.transfer)
+        val transferValue = numberField(old.gridFeeMinorUnit, t(R.string.transfer_hint, "öre"))
         content.addView(vat); content.addView(tax); content.addView(taxValue); content.addView(transfer); content.addView(transferValue)
         var previousCountry = PriceMarkets.find(old.area).country
         fun selectedArea() = (area.selectedItem as? AreaChoice)?.code ?: old.area
         fun updateMarketText() {
             val market = PriceMarkets.find(selectedArea())
             val vatText = market.vatPercent.toString().replace(".0", "").replace('.', ',')
-            vat.text = if (market.vatPercent == 0.0) tf("vat_zero", market.area) else tf("vat", vatText)
+            vat.text = if (market.vatPercent == 0.0) t(R.string.vat_zero, market.area) else t(R.string.vat, vatText)
             vat.isEnabled = market.vatPercent > 0.0
             quarter.isEnabled = market.sourceIntervalMinutes == 15
             if (!quarter.isEnabled) hour.isChecked = true
-            taxValue.hint = tf("tax_hint", market.minorUnit)
-            transferValue.hint = tf("transfer_hint", market.minorUnit)
+            taxValue.hint = t(R.string.tax_hint, market.minorUnit)
+            transferValue.hint = t(R.string.transfer_hint, market.minorUnit)
             if (market.country != previousCountry) {
                 taxValue.setText(market.suggestedTax.toString())
                 transferValue.setText(market.suggestedTransfer.toString())
                 previousCountry = market.country
             }
-            priceInfo.text = AppLanguageSettings.marketInfo(this, market)
+            priceInfo.text = t(R.string.market_info, market.suggestedTax.toString(), market.minorUnit, market.suggestedTransfer.toString())
         }
         area.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) = Unit
@@ -173,27 +183,28 @@ class WidgetConfigActivity : Activity() {
         }
         updateMarketText()
         content.addView(Button(this).apply {
-            text = t("save")
+            text = t(R.string.save)
             setOnClickListener {
                 WidgetSettings.save(this@WidgetConfigActivity, widgetId, old.copy(
                     area = selectedArea(), vat = vat.isChecked, tax = tax.isChecked,
-                    transfer = transfer.isChecked, taxOre = number(taxValue), transferOre = number(transferValue),
-                    intervalMinutes = interval.checkedRadioButtonId.takeIf { it in listOf(15, 60) } ?: 15
+                    transfer = transfer.isChecked, taxMinorUnit = number(taxValue), gridFeeMinorUnit = number(transferValue),
+                    intervalMinutes = if (interval.checkedRadioButtonId == hourId) 60 else 15
                 ))
                 PriceWidgetProvider.update(this@WidgetConfigActivity, AppWidgetManager.getInstance(this@WidgetConfigActivity), widgetId)
                 if (!editing) {
                     setResult(RESULT_OK, Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)); finish()
-                } else Toast.makeText(this@WidgetConfigActivity, td("updated"), Toast.LENGTH_SHORT).show()
+                } else Toast.makeText(this@WidgetConfigActivity, t(R.string.updated), Toast.LENGTH_SHORT).show()
             }
         }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(54)).apply { topMargin = dp(20) })
     }
 
     private fun showCharging() {
+        val generation = ++viewGeneration
         scrollView.setOnScrollChangeListener(null as View.OnScrollChangeListener?)
         content.removeAllViews()
         var settings = WidgetSettings.load(this, widgetId)
         content.addView(TextView(this).apply {
-            text = td("planner_intro")
+            text = t(R.string.planner_intro)
             textSize = 15f; setTextColor(muted); setPadding(0, dp(8), 0, dp(12))
         })
         val resultBox = LinearLayout(this).apply {
@@ -203,53 +214,58 @@ class WidgetConfigActivity : Activity() {
         }
         val resultTitle = TextView(this).apply { textSize = 21f; setTextColor(dark); typeface = Typeface.DEFAULT_BOLD }
         resultBox.addView(resultTitle)
-        val costValue = resultRow(resultBox, t("cost"))
-        val energyResultValue = resultRow(resultBox, t("charging"))
-        val distanceValue = resultRow(resultBox, t("range"))
-        val powerValue = resultRow(resultBox, t("power"))
+        val costValue = resultRow(resultBox, t(R.string.cost))
+        val energyResultValue = resultRow(resultBox, t(R.string.charging))
+        val distanceValue = resultRow(resultBox, t(R.string.range))
+        val powerValue = resultRow(resultBox, t(R.string.power))
         val resultNote = TextView(this).apply { textSize = 13f; setTextColor(muted); setPadding(0, dp(7), 0, 0) }
         resultBox.addView(resultNote)
         content.addView(resultBox, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { bottomMargin = dp(10) })
 
-        content.addView(label(t("connection")).apply {
+        content.addView(label(t(R.string.connection)).apply {
             setTextColor(dark)
             textSize = 16f
             typeface = Typeface.DEFAULT
         })
         val phases = RadioGroup(this).apply { orientation = RadioGroup.HORIZONTAL }
-        val onePhase = RadioButton(this).apply { id = 1; text = t("phase_one"); isChecked = settings.chargingPhases == 1 }
-        val threePhase = RadioButton(this).apply { id = 3; text = t("phase_three"); isChecked = settings.chargingPhases != 1 }
+        val onePhaseText = t(R.string.phase_one)
+        val threePhaseText = t(R.string.phase_three)
+        val onePhaseId = View.generateViewId()
+        val threePhaseId = View.generateViewId()
+        val onePhase = RadioButton(this).apply { id = onePhaseId; text = onePhaseText; isChecked = settings.chargingPhases == 1 }
+        val threePhase = RadioButton(this).apply { id = threePhaseId; text = threePhaseText; isChecked = settings.chargingPhases != 1 }
         phases.addView(onePhase); phases.addView(threePhase); content.addView(phases)
+        fun selectedPhases() = if (phases.checkedRadioButtonId == onePhaseId) 1 else 3
         val ampsValue = valueLabel()
-        val amps = slider(t("charge_current"), 6, 16, settings.chargingAmps, ampsValue) { value ->
-            ampsValue.text = "$value A · %.1f kW".format(ChargingPlanner.powerKw(value, phases.checkedRadioButtonId))
+        val amps = slider(t(R.string.charge_current), 6, 16, settings.chargingAmps, ampsValue) { value ->
+            ampsValue.text = t(R.string.amps_power, value, ChargingPlanner.powerKw(value, selectedPhases()))
         }
         val consumptionValue = valueLabel()
-        val consumption = slider(t("consumption"), 10, 40, (settings.consumptionKwhPerMil * 10).toInt(), consumptionValue) { value ->
-            consumptionValue.text = "%.1f kWh/10 km".format(value / 10.0)
+        val consumption = slider(t(R.string.consumption), 10, 40, (settings.consumptionKwhPerMil * 10).toInt(), consumptionValue) { value ->
+            consumptionValue.text = t(R.string.consumption_value, value / 10.0)
         }
         val energyValue = valueLabel()
-        val energy = slider(t("charging"), 1, 100, settings.chargingKwh, energyValue) { value ->
-            energyValue.text = "$value kWh"
+        val energy = slider(t(R.string.charging), 1, 100, settings.chargingKwh, energyValue) { value ->
+            energyValue.text = t(R.string.energy_value_integer, value)
         }
         var departureHour = settings.departureHour
         var departureMinute = settings.departureMinute
-        val useDeparture = checkbox(t("departure_check"), settings.useDepartureTime)
+        val useDeparture = checkbox(t(R.string.departure_check), settings.useDepartureTime)
         content.addView(useDeparture)
         val departureButton = Button(this).apply {
-            text = tf("departure", "%02d:%02d".format(departureHour, departureMinute))
+            text = t(R.string.departure, "%02d:%02d".format(departureHour, departureMinute))
             isAllCaps = false
             isEnabled = useDeparture.isChecked
         }
         content.addView(departureButton, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48)))
-        val showInWidget = checkbox(t("widget_plan"), settings.showChargingPlan)
+        val showInWidget = checkbox(t(R.string.widget_plan), settings.showChargingPlan)
         content.addView(showInWidget)
         val status = TextView(this).apply { textSize = 13f; setTextColor(muted); setPadding(0, dp(8), 0, 0) }
         content.addView(status)
 
         var prices: PriceResult? = null
         fun currentSettings() = settings.copy(
-            chargingPhases = phases.checkedRadioButtonId.takeIf { it == 1 || it == 3 } ?: 3,
+            chargingPhases = selectedPhases(),
             chargingAmps = amps.progress + 6,
             consumptionKwhPerMil = (consumption.progress + 10) / 10.0,
             chargingKwh = energy.progress + 1,
@@ -273,65 +289,70 @@ class WidgetConfigActivity : Activity() {
                 val departure = firstStart.withHour(settings.departureHour).withMinute(settings.departureMinute)
                     .let { if (it <= firstStart) it.plusDays(1) else it }
                 val missesDeparture = settings.useDepartureTime && firstStart.plusMinutes(durationMinutes) > departure
-                resultTitle.text = if (missesDeparture) td("misses_departure") else td("no_plan")
+                resultTitle.text = if (missesDeparture) t(R.string.misses_departure) else t(R.string.no_plan)
                 costValue.text = "–"; energyResultValue.text = "–"; distanceValue.text = "–"; powerValue.text = "–"
                 costValue.setTextColor(dark)
                 resultNote.text = if (missesDeparture) {
                     val hours = durationMinutes / 60
                     val minutes = durationMinutes % 60
-                    val duration = if (minutes == 0L) "$hours timmar" else "$hours tim $minutes min"
-                    "Laddningen kräver cirka $duration. Minska energimängden, höj strömmen eller avmarkera avresetiden för att planera över flera dygn."
+                    val duration = if (minutes == 0L) tq(R.plurals.duration_hours, hours.toInt(), hours) else t(R.string.duration_hours_minutes, hours, minutes)
+                    t(R.string.charging_too_long, duration)
                 } else {
-                    td("not_enough_prices")
+                    t(R.string.not_enough_prices)
                 }
             } else {
                 val locale = AppLanguageSettings.locale(this)
-                resultTitle.text = "${plan.start.format(DateTimeFormatter.ofPattern("EEE HH:mm", locale))}  –  ${plan.end.format(DateTimeFormatter.ofPattern("EEE HH:mm", locale))}"
+                resultTitle.text = t(R.string.charging_window,
+                    plan.start.format(DateTimeFormatter.ofPattern("EEE HH:mm", locale)),
+                    plan.end.format(DateTimeFormatter.ofPattern("EEE HH:mm", locale)))
                 val estimated = plan.estimatedPriceSlots > 0
                 val currency = PriceMarkets.find(settings.area).currency
-                costValue.text = if (estimated) "${t("estimated")} %.2f %s".format(plan.estimatedCostSek, currency) else "${t("approximately")} %.2f %s".format(plan.estimatedCostSek, currency)
+                costValue.text = if (estimated) "${t(R.string.estimated)} %.2f %s".format(plan.estimatedCost, currency) else "${t(R.string.approximately)} %.2f %s".format(plan.estimatedCost, currency)
                 costValue.setTextColor(if (estimated) 0xFFE58A2B.toInt() else dark)
-                energyResultValue.text = "%.1f kWh".format(plan.energyKwh)
-                distanceValue.text = if (AppLanguageSettings.language(this) in setOf("sv", "nb")) "${t("approximately")} %.1f mil".format(plan.distanceMil)
-                    else "${t("approximately")} %.0f km".format(plan.distanceMil * 10)
-                powerValue.text = tf("power_phase", plan.powerKw, if (settings.chargingPhases == 1) t("phase_one") else t("phase_three"))
+                energyResultValue.text = t(R.string.energy_value, plan.energyKwh)
+                distanceValue.text = if (AppLanguageSettings.language(this) in setOf("sv", "nb")) "${t(R.string.approximately)} %.1f mil".format(plan.distanceMil)
+                    else "${t(R.string.approximately)} %.0f km".format(plan.distanceMil * 10)
+                powerValue.text = t(R.string.power_phase, plan.powerKw, if (settings.chargingPhases == 1) t(R.string.phase_one) else t(R.string.phase_three))
                 resultNote.text = when {
-                    estimated -> td("estimated_note").format(plan.estimatedPriceSlots)
+                    estimated -> tq(R.plurals.estimated_note, plan.estimatedPriceSlots, plan.estimatedPriceSlots)
                     else -> ""
                 }
             }
         }
         val listener = object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                ampsValue.text = "${amps.progress + 6} A · %.1f kW".format(ChargingPlanner.powerKw(amps.progress + 6, phases.checkedRadioButtonId))
-                consumptionValue.text = "%.1f kWh/10 km".format((consumption.progress + 10) / 10.0)
-                energyValue.text = "${energy.progress + 1} kWh"
+                ampsValue.text = t(R.string.amps_power, amps.progress + 6, ChargingPlanner.powerKw(amps.progress + 6, selectedPhases()))
+                consumptionValue.text = t(R.string.consumption_value, (consumption.progress + 10) / 10.0)
+                energyValue.text = t(R.string.energy_value_integer, energy.progress + 1)
                 render()
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
-            override fun onStopTrackingTouch(seekBar: SeekBar?) { saveCharging(currentSettings()); status.text = td("saved") }
+            override fun onStopTrackingTouch(seekBar: SeekBar?) { saveCharging(currentSettings()); status.text = t(R.string.saved) }
         }
         amps.setOnSeekBarChangeListener(listener); consumption.setOnSeekBarChangeListener(listener); energy.setOnSeekBarChangeListener(listener)
         phases.setOnCheckedChangeListener { _, _ ->
-            ampsValue.text = "${amps.progress + 6} A · %.1f kW".format(ChargingPlanner.powerKw(amps.progress + 6, phases.checkedRadioButtonId))
-            saveCharging(currentSettings()); render(); status.text = td("saved")
+            ampsValue.text = t(R.string.amps_power, amps.progress + 6, ChargingPlanner.powerKw(amps.progress + 6, selectedPhases()))
+            saveCharging(currentSettings()); render(); status.text = t(R.string.saved)
         }
         departureButton.setOnClickListener {
             TimePickerDialog(this, { _, hour, minute ->
                 departureHour = hour; departureMinute = minute
-                departureButton.text = tf("departure", "%02d:%02d".format(hour, minute))
-                saveCharging(currentSettings()); render(); status.text = td("saved")
+                departureButton.text = t(R.string.departure, "%02d:%02d".format(hour, minute))
+                saveCharging(currentSettings()); render(); status.text = t(R.string.saved)
             }, departureHour, departureMinute, true).show()
         }
         useDeparture.setOnCheckedChangeListener { _, checked ->
             departureButton.isEnabled = checked
-            saveCharging(currentSettings()); render(); status.text = td("saved")
+            saveCharging(currentSettings()); render(); status.text = t(R.string.saved)
         }
-        showInWidget.setOnCheckedChangeListener { _, _ -> saveCharging(currentSettings()); render(); status.text = td("saved_updated") }
+        showInWidget.setOnCheckedChangeListener { _, _ -> saveCharging(currentSettings()); render(); status.text = t(R.string.saved_updated) }
         render()
-        Executors.newSingleThreadExecutor().execute {
-            val loaded = PriceRepository.load(this, settings.area)
-            runOnUiThread { prices = loaded; render(); status.text = td("prices_for").format(settings.area) }
+        ioExecutor.execute {
+            val loaded = PriceRepository.load(applicationContext, settings.area)
+            runOnUiThread {
+                if (isDestroyed || generation != viewGeneration) return@runOnUiThread
+                prices = loaded; render(); status.text = t(R.string.prices_for, settings.area)
+            }
         }
     }
 
@@ -371,50 +392,35 @@ class WidgetConfigActivity : Activity() {
     }
 
     private fun showTable() {
+        val generation = ++viewGeneration
         scrollView.setOnScrollChangeListener(null as View.OnScrollChangeListener?)
         content.removeAllViews()
         content.addView(ProgressBar(this).apply { isIndeterminate = true })
-        Executors.newSingleThreadExecutor().execute {
+        ioExecutor.execute {
             val settings = WidgetSettings.load(this, widgetId)
-            val result = PriceRepository.load(this, settings.area)
+            val result = PriceRepository.load(applicationContext, settings.area)
             runOnUiThread {
+                if (isDestroyed || generation != viewGeneration) return@runOnUiThread
                 content.removeAllViews()
                 val market = PriceMarkets.find(settings.area)
-                content.addView(TextView(this).apply { text = "${settings.area} · ${settings.intervalMinutes}-minuterspriser · ${market.priceUnit}"; textSize = 19f; setTextColor(dark); setPadding(0, dp(8), 0, dp(12)) })
+                content.addView(TextView(this).apply { text = t(R.string.table_title, settings.area, settings.intervalMinutes, market.priceUnit); textSize = 19f; setTextColor(dark); setPadding(0, dp(8), 0, dp(12)) })
                 val tableHeader = addTableHeader()
                 scrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
                     val offset = (scrollY - tableHeader.top).coerceAtLeast(0)
                     tableHeader.translationY = offset.toFloat()
                     tableHeader.elevation = if (offset > 0) dp(3).toFloat() else 0f
                 }
-                val today = ChartRenderer.aggregate(result.today, settings)
-                val tomorrow = ChartRenderer.aggregate(result.tomorrow, settings)
-                val todayAverage = today.map { settings.apply(it.second) }.average().takeUnless { it.isNaN() }
-                val tomorrowAverage = tomorrow.map { settings.apply(it.second) }.average().takeUnless { it.isNaN() }
-                val todayPrices = today.map { settings.apply(it.second) }
-                val tomorrowPrices = tomorrow.map { settings.apply(it.second) }
-                val todayRange = (todayPrices.minOrNull() ?: 0.0) to (todayPrices.maxOrNull() ?: 0.0)
-                val tomorrowRange = (tomorrowPrices.minOrNull() ?: 0.0) to (tomorrowPrices.maxOrNull() ?: 0.0)
-                val now = OffsetDateTime.now()
-                val currentIndex = today.indices.lastOrNull { today[it].first <= now } ?: -1
-                val count = maxOf(today.size, tomorrow.size)
-                repeat(count) { index ->
-                    val time = (today.getOrNull(index)?.first ?: tomorrow.getOrNull(index)?.first)?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: ""
+                val model = PriceTableModels.create(result, settings, OffsetDateTime.now(PriceMarkets.find(settings.area).zoneId))
+                model.rows.forEach { row ->
                     addRow(
-                        time,
-                        today.getOrNull(index)?.second?.let(settings::apply),
-                        tomorrow.getOrNull(index)?.second?.let(settings::apply),
-                        todayAverage,
-                        tomorrowAverage,
-                        todayRange,
-                        tomorrowRange,
-                        index == currentIndex
+                        row.time.format(DateTimeFormatter.ofPattern("HH:mm")), row.today, row.tomorrow,
+                        model.todayAverage, model.tomorrowAverage, model.todayRange, model.tomorrowRange, row.current
                     )
                 }
-                if (count == 0) content.addView(TextView(this).apply { text = t("no_prices"); setPadding(0, dp(20), 0, 0) })
-                if (currentIndex >= 0) {
+                if (model.rows.isEmpty()) content.addView(TextView(this).apply { text = t(R.string.no_prices); setPadding(0, dp(20), 0, 0) })
+                if (model.currentIndex >= 0) {
                     content.post {
-                        val row = content.getChildAt(currentIndex + 2) // titel + tabellhuvud
+                        val row = content.getChildAt(model.currentIndex + 2) // title + table header
                         scrollView.scrollTo(0, (row.top - scrollView.height / 3).coerceAtLeast(0))
                     }
                 }
@@ -423,7 +429,7 @@ class WidgetConfigActivity : Activity() {
     }
 
     private fun addTableHeader(): View {
-        val header = rowView(t("time"), t("today"), t("tomorrow"), true, null, null, false).apply {
+        val header = rowView(t(R.string.time), t(R.string.today), t(R.string.tomorrow), true, null, null, false).apply {
             setBackgroundColor(appBackground)
         }
         content.addView(header)
@@ -490,9 +496,14 @@ class WidgetConfigActivity : Activity() {
     private fun number(field: EditText) = field.text.toString().replace(',', '.').toDoubleOrNull() ?: 0.0
     private fun weight() = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
     private fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()
-    private fun t(key: String) = AppLanguageSettings.text(this, key)
-    private fun tf(key: String, vararg args: Any) = String.format(AppLanguageSettings.locale(this), t(key), *args)
-    private fun td(key: String) = AppLanguageSettings.detail(this, key)
+    private fun t(id: Int, vararg args: Any) = AppLanguageSettings.text(this, id, *args)
+    private fun tq(id: Int, quantity: Int, vararg args: Any) = AppLanguageSettings.quantityText(this, id, quantity, *args)
+
+    override fun onDestroy() {
+        viewGeneration++
+        ioExecutor.shutdownNow()
+        super.onDestroy()
+    }
 
     companion object { const val EXTRA_EXISTING_WIDGET = "existing_widget" }
 }
