@@ -32,8 +32,10 @@ object PriceRepository {
     }
 
     private fun fetch(context: Context, date: LocalDate, area: String): List<PricePoint>? {
-        val path = "%04d/%02d-%02d_%s.json".format(date.year, date.monthValue, date.dayOfMonth, area)
-        val address = "https://www.elprisetjustnu.se/api/v1/prices/$path"
+        val market = PriceMarkets.find(area)
+        val suffix = if (market.usesAreaSuffix) "_$area" else ""
+        val path = "%04d/%02d-%02d%s.json".format(date.year, date.monthValue, date.dayOfMonth, suffix)
+        val address = "${market.baseUrl}/api/v1/prices/$path"
         val connection = URL(address)
             .openConnection() as HttpURLConnection
         return try {
@@ -47,12 +49,7 @@ object PriceRepository {
             if (status !in 200..299) return null
             val body = connection.inputStream.bufferedReader().use { it.readText() }
             val json = JSONArray(body)
-            val points = buildList {
-                for (i in 0 until json.length()) {
-                    val row = json.getJSONObject(i)
-                    add(PricePoint(OffsetDateTime.parse(row.getString("time_start")), row.getDouble("SEK_per_kWh")))
-                }
-            }
+            val points = parse(json, market)
             writeCache(context, date, area, body)
             Log.i(TAG, "Parsed ${points.size} prices for $area $date")
             points
@@ -74,16 +71,26 @@ object PriceRepository {
         val body = context.getSharedPreferences(CACHE_PREFS, Context.MODE_PRIVATE)
             .getString("$area:$date", null) ?: return emptyList()
         return try {
-            val json = JSONArray(body)
-            buildList {
-                for (i in 0 until json.length()) {
-                    val row = json.getJSONObject(i)
-                    add(PricePoint(OffsetDateTime.parse(row.getString("time_start")), row.getDouble("SEK_per_kWh")))
-                }
-            }.also { Log.i(TAG, "Cache hit $area $date count=${it.size}") }
+            parse(JSONArray(body), PriceMarkets.find(area))
+                .also { Log.i(TAG, "Cache hit $area $date count=${it.size}") }
         } catch (error: Exception) {
             Log.e(TAG, "Invalid cache $area $date", error)
             emptyList()
+        }
+    }
+
+    /** Normaliserar även timpris-API:erna till kvartspunkter för graf och laddplanering. */
+    private fun parse(json: JSONArray, market: PriceMarket): List<PricePoint> = buildList {
+        for (i in 0 until json.length()) {
+            val row = json.getJSONObject(i)
+            val start = OffsetDateTime.parse(row.getString("time_start"))
+            val end = OffsetDateTime.parse(row.getString("time_end"))
+            val price = row.getDouble(market.priceField)
+            var slot = start
+            while (slot < end) {
+                add(PricePoint(slot, price))
+                slot = slot.plusMinutes(15)
+            }
         }
     }
 }

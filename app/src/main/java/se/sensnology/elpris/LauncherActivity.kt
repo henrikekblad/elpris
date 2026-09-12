@@ -41,11 +41,11 @@ class LauncherActivity : Activity() {
             addView(ImageView(this@LauncherActivity).apply { setImageResource(R.drawable.app_icon) },
                 LinearLayout.LayoutParams(dp(38), dp(38)).apply { marginEnd = dp(10) })
             addView(TextView(this@LauncherActivity).apply {
-                text = "Elpris"; textSize = 27f; setTextColor(textColor)
+                text = AppLanguageSettings.text(this@LauncherActivity, "app_title"); textSize = 27f; setTextColor(textColor)
             })
         }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
         root.addView(TextView(this).apply {
-            text = "Välj vilken widget du vill öppna"
+            text = AppLanguageSettings.text(this@LauncherActivity, "choose_widget")
             textSize = 16f
             setTextColor(mutedColor)
             setPadding(0, dp(12), 0, dp(12))

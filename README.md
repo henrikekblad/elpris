@@ -1,101 +1,92 @@
 # Elpris
 
-En anpassningsbar Android-widget som visar spotpriser för idag och imorgon på samma 24-timmarsaxel. Appen hämtar öppna prisdata från [Elpriset just nu](https://www.elprisetjustnu.se/elpris-api) och stöder samtliga svenska elområden.
+[Svensk dokumentation](README.sv.md)
+
+Elpris is a configurable Android home-screen widget that displays today's and tomorrow's electricity spot prices on the same 24-hour chart. It supports Sweden, Norway, Denmark and Finland and is available in Swedish, Norwegian, Danish, Finnish and English.
 
 <p align="center">
-  <img src="assets/widget.jpg" alt="Elpriswidget med dagens och morgondagens priser" width="720">
+  <img src="assets/widget.jpg" alt="Elpris widget showing today's and tomorrow's electricity prices" width="720">
 </p>
 
-## Funktioner
+## Features
 
-- Överlagrade kvartskurvor för idag och imorgon. Morgondagen visas som ljusa grå punkter bakom dagens priser.
-- Aktuell kvart markeras med en större punkt; dygnets min-, max- och aktuella pris visas överst.
-- Val mellan 15-minuterspriser och heltimmesmedel.
-- Separata inställningar per widget för elområde SE1–SE4.
-- Valfri moms, energiskatt och överföringsavgift.
-- Pristabell med idag och imorgon sida vid sida, färgkodning och automatisk scrollning till aktuell tid.
-- Elbilsplanering som hittar den billigaste sammanhängande laddtiden under nästa dygn utifrån laddström, önskad energi och bilens förbrukning.
-- Valfri laddrekommendation direkt under grafen i widgeten.
-- Storleksanpassningsbar widget för olika launchers och skärmstorlekar.
-- Persistent lokal cache: senast hämtade priser finns kvar vid tillfälliga nätverksfel.
-- Automatiska publiceringskontroller från 13:00 och fortsatta återförsök tills morgondagens priser har hämtats.
+- Overlaid price charts make it easy to compare the same time today and tomorrow.
+- The current interval is highlighted, with the day's minimum, maximum and current price shown above the chart.
+- Swedish SE1–SE4, Norwegian NO1–NO5, Danish DK1–DK2 and Finland.
+- 15-minute prices where supplied by the source, or hourly averages.
+- Local currencies and country-specific VAT rates.
+- Optional editable electricity tax and grid fee.
+- Price table with colour-coded rows and highlighting of the current interval.
+- EV charging planner for single-phase or three-phase charging, including energy demand, consumption and departure time.
+- Optional charging recommendation at the bottom of the widget.
+- Flexible widget sizing for different screens and launchers.
+- Local cache for temporary network failures.
+- Automatic publication checks for tomorrow's prices.
 
 <p align="center">
-  <img src="assets/table.jpg" alt="Färgkodad pristabell för idag och imorgon" width="360">
+  <img src="assets/table.jpg" alt="Colour-coded electricity price table" width="360">
   &nbsp;&nbsp;
-  <img src="assets/settings.jpg" alt="Inställningar för elområde, upplösning, moms, skatt och avgifter" width="360">
+  <img src="assets/settings.jpg" alt="Price-area, tax and display settings" width="360">
 </p>
 
-## Användning
+## Installation
 
-1. Installera APK-filen från projektets [Releases](../../releases).
-2. Lägg till **Elpris** från startskärmens widgetväljare.
-3. Välj elområde, upplösning och eventuella påslag.
-4. Tryck på widgeten för att öppna inställningar, pristabell och elbilsplanering.
+1. Download the APK from [Releases](../../releases).
+2. Install it and add **Elpris** from the Android widget picker.
+3. Select a language, price area, resolution and any applicable taxes or fees.
+4. Tap the widget to open its settings, price table and EV planner.
 
-## Elbilsplanering
+## EV charging planner
 
-På fliken **Elbil** väljer du laddström för trefasladdning (6–16 A), bilens ungefärliga förbrukning i kWh/mil och hur många kWh du vill ladda. Du kan ange en avresetid så att laddningen alltid hinner bli klar; nästa förekomst av det valda klockslaget används. Appen visar hur långt energin ungefär räcker, uppskattad kostnad samt den billigaste sammanhängande laddperioden före avresan eller bland priserna för de kommande 24 timmarna. När morgondagens priser ännu inte har publicerats markeras att beräkningen endast bygger på tillgängliga priser.
+Choose single-phase or three-phase charging (6–16 A), vehicle consumption, energy to add and optionally a departure time. The app finds the cheapest continuous charging period and estimates its cost and resulting range.
 
-Beräkningen utgår från 400 V trefas och ideal laddningseffekt. Verklig effekt, laddförlust och bilens laddkurva kan göra laddningen något långsammare. Tider och kostnader är därför uppskattningar.
+If charging extends beyond the published prices, missing intervals are estimated from the latest published daily price profile and the result is clearly marked as estimated. Calculations use ideal power at 230 V single phase or 400 V three phase; actual charging losses and the vehicle's charging curve are not included.
 
 <p align="center">
-  <img src="assets/charge.jpg" alt="Elbilsplanering med laddström, förbrukning, energimängd, avresetid och rekommenderad laddperiod" width="360">
+  <img src="assets/charge.jpg" alt="EV charging planner" width="360">
 </p>
 
-Flera widgetinstanser kan använda olika elområden och avgifter.
+## Price data and calculation
 
-## Prismodell
+Prices are retrieved from the open APIs provided by [elprisetjustnu.se](https://www.elprisetjustnu.se/), [hvakosterstrommen.no](https://www.hvakosterstrommen.no/), [elprisenligenu.dk](https://www.elprisenligenu.dk/) and [sahkonhintatanaan.fi](https://www.sahkonhintatanaan.fi/). The widget uses the local currency: SEK, NOK, DKK or EUR.
 
-API-värdet är spotpris utan moms, skatter och tillägg. Appen räknar om kronor till öre och tillämpar valda påslag enligt:
+The API value is a spot price without VAT, electricity tax or grid fees. Enabled additions are calculated as:
 
 ```text
-(spotpris × 100 + energiskatt + överföringsavgift) × moms
+(spot price × 100 + electricity tax + grid fee) × VAT
 ```
 
-Moms multipliceras sist. Fasta månadsavgifter ingår inte eftersom de inte kan uttryckas korrekt per kWh utan en förbrukningsprognos. Kontrollera beloppen mot ditt elnätsavtal och aktuella skatteregler.
+VAT is applied last and follows the selected market. Suggested tax values are editable. Grid fees vary by provider, tariff and agreement, so users should verify all values against their local rules and electricity contract. Fixed monthly charges are not included.
 
-Appens förslag för 2026 är 36,0 öre/kWh i ordinarie energiskatt och 30,0 öre/kWh i överföringsavgift, båda exklusive moms. Överföringsavgiften är ett avrundat riktvärde eftersom den varierar mellan nätbolag och tariffmodeller.
+## Build locally
 
-## Bygga lokalt
-
-Krav:
+Requirements:
 
 - JDK 17
 - Android SDK 36
-
-Bygg en debug-APK:
 
 ```bash
 ./gradlew assembleDebug
 ```
 
-APK:n skapas i `app/build/outputs/apk/debug/`.
+The debug APK is created in `app/build/outputs/apk/debug/`.
 
-## Uppdateringar och cache
+## Privacy and troubleshooting
 
-Android begär normalt widgetuppdatering ungefär var 30:e minut, men systemet kan senarelägga körningar för att spara batteri. Appen gör dessutom särskilda kontroller kring morgondagens publicering och fortsätter var 30:e minut tills ett komplett morgondagsdygn har sparats.
-
-Lyckade API-svar cachas lokalt per datum och elområde. Appen samlar inte in eller skickar någon användardata.
-
-## Felsökning
-
-Relevanta Android-loggar kan läsas med:
+Successful API responses are cached locally by date and price area. The app does not collect or transmit personal data.
 
 ```bash
 adb logcat -d | grep -E 'ElprisRepository|ElprisWidget|ElprisScheduler'
 ```
 
-Loggarna innehåller URL, HTTP-status, antal parsade priser, cacheträffar och nästa schemalagda kontroll – men inga lösenord eller personuppgifter.
+Logs contain URLs, HTTP status codes, parsed price counts, cache hits and the next scheduled check, but no passwords or personal information.
 
-## Datakälla och ansvar
+## Disclaimer
 
-Prisdata tillhandahålls av [Elpriset just nu](https://www.elprisetjustnu.se/elpris-api). Projektet är inte anslutet till dataleverantören, Nord Pool, något elbolag eller elnätsföretag. Uppgifterna är vägledande; kontrollera alltid ditt avtal och din faktura.
+Elpris is not affiliated with the API providers, Nord Pool, electricity retailers or grid operators. Prices and charging calculations are guidance only; always verify them against your agreement and invoice.
 
-## Paketnamn
+Package name: `se.sensnology.elpris`
 
-`se.sensnology.elpris`
+## License
 
-## Licens
-
-Projektet distribueras under [MIT-licensen](LICENSE).
+Distributed under the [MIT License](LICENSE).

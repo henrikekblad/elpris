@@ -1,5 +1,6 @@
 package se.sensnology.elpris
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -7,7 +8,6 @@ import android.graphics.Paint
 import android.graphics.RectF
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
 
@@ -19,7 +19,7 @@ object ChartRenderer {
     private const val EXPENSIVE = 0xFFFF625F.toInt()
     private const val TOMORROW = 0xFFC5CBD3.toInt()
 
-    fun render(width: Int, height: Int, scaledDensity: Float, settings: WidgetSettings, result: PriceResult): Bitmap {
+    fun render(context: Context, width: Int, height: Int, scaledDensity: Float, settings: WidgetSettings, result: PriceResult): Bitmap {
         val w = width.coerceIn(180, 1400)
         val h = height.coerceIn(100, 900)
         val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
@@ -38,7 +38,7 @@ object ChartRenderer {
             paint.typeface = android.graphics.Typeface.DEFAULT
             paint.textSize = 12f * scale
             paint.color = MUTED
-            canvas.drawText("Kunde inte hämta priser", pad, h / 2f, paint)
+            canvas.drawText(AppLanguageSettings.text(context, "could_not_fetch"), pad, h / 2f, paint)
             return bitmap
         }
 
@@ -51,7 +51,8 @@ object ChartRenderer {
         val desiredHeader = 19f * scaledDensity
         val maxText = dayMax?.let { "↑%.1f".format(it) } ?: "↑–"
         val minText = dayMin?.let { "↓%.1f".format(it) } ?: "↓–"
-        val currentText = current?.let { "%.1f öre/kWh".format(it) } ?: "– öre/kWh"
+        val priceUnit = PriceMarkets.find(settings.area).priceUnit
+        val currentText = current?.let { "%.1f %s".format(it, priceUnit) } ?: "– $priceUnit"
         paint.typeface = android.graphics.Typeface.DEFAULT_BOLD
         paint.textSize = desiredHeader
         val requiredWidth = paint.measureText(maxText) + paint.measureText(minText) + paint.measureText(currentText) + pad * 5
@@ -115,11 +116,18 @@ object ChartRenderer {
             paint.typeface = android.graphics.Typeface.DEFAULT_BOLD
             paint.textSize = max(axisText, 13f * scaledDensity)
             paint.textAlign = Paint.Align.CENTER
-            val day = plan.start.format(DateTimeFormatter.ofPattern("EEE", Locale.forLanguageTag("sv-SE")))
+            val locale = AppLanguageSettings.locale(context)
+            val day = plan.start.format(DateTimeFormatter.ofPattern("EEE", locale))
             val start = plan.start.format(DateTimeFormatter.ofPattern("HH:mm"))
-            val end = plan.end.format(DateTimeFormatter.ofPattern("HH:mm"))
-            val chargingText = "Ladda $day $start–$end · %.1f kWh".format(plan.energyKwh)
-            val chargingTextWithRange = "$chargingText · %.1f mil".format(plan.distanceMil)
+            val end = plan.end.format(DateTimeFormatter.ofPattern(
+                if (plan.start.toLocalDate() == plan.end.toLocalDate()) "HH:mm" else "EEE HH:mm",
+                locale
+            ))
+            val estimate = if (plan.estimatedPriceSlots > 0) "${AppLanguageSettings.text(context, "estimated")} · " else ""
+            val chargingText = "$estimate${AppLanguageSettings.text(context, "charge")} $day $start–$end · %.1f kWh".format(plan.energyKwh)
+            val rangeText = if (AppLanguageSettings.language(context) in setOf("sv", "nb")) "%.1f mil".format(plan.distanceMil)
+                else "%.0f km".format(plan.distanceMil * 10)
+            val chargingTextWithRange = "$chargingText · $rangeText"
             val footerText = if (paint.measureText(chargingTextWithRange) <= right - left) chargingTextWithRange else chargingText
             canvas.drawText(footerText, (left + right) / 2f, h - pad * .7f, paint)
             paint.textAlign = Paint.Align.LEFT

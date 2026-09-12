@@ -69,7 +69,7 @@ class PriceWidgetProvider : AppWidgetProvider() {
                     val height = (options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 180) * density).toInt()
                     val views = RemoteViews(context.packageName, R.layout.widget_price)
                     val oneSp = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 1f, context.resources.displayMetrics)
-                    views.setImageViewBitmap(R.id.chart, ChartRenderer.render(width, height, oneSp, settings, data))
+                    views.setImageViewBitmap(R.id.chart, ChartRenderer.render(context, width, height, oneSp, settings, data))
                     val openApp = Intent(context, WidgetConfigActivity::class.java).apply {
                         putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
                         putExtra(WidgetConfigActivity.EXTRA_EXISTING_WIDGET, true)
