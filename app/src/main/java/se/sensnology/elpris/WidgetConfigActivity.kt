@@ -441,8 +441,8 @@ class WidgetConfigActivity : Activity() {
             text = t(R.string.home_assistant_save); isAllCaps = false
             setOnClickListener {
                 val entered = enteredSettings()
-                if (entered.configured && !entered.baseUrl.startsWith("https://")) {
-                    status.text = t(R.string.home_assistant_https_required)
+                if (entered.configured && !HomeAssistantSettings.isAllowedBaseUrl(entered.baseUrl)) {
+                    status.text = t(R.string.home_assistant_address_required)
                     status.setTextColor(0xFFD65C5C.toInt())
                 } else {
                     HomeAssistantSettings.save(this@WidgetConfigActivity, entered)
@@ -455,8 +455,8 @@ class WidgetConfigActivity : Activity() {
             text = t(R.string.home_assistant_check); isAllCaps = false
             setOnClickListener {
                 val entered = enteredSettings()
-                if (!entered.configured || !entered.baseUrl.startsWith("https://")) {
-                    status.text = t(R.string.home_assistant_https_required)
+                if (!entered.configured || !HomeAssistantSettings.isAllowedBaseUrl(entered.baseUrl)) {
+                    status.text = t(R.string.home_assistant_address_required)
                     status.setTextColor(0xFFD65C5C.toInt())
                     return@setOnClickListener
                 }

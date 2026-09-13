@@ -8,6 +8,15 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HomeAssistantClientTest {
+    @Test fun allowsHttpsAndPrivateLocalHttpOnly() {
+        assertTrue(HomeAssistantSettings.isAllowedBaseUrl("https://ha.example.com"))
+        assertTrue(HomeAssistantSettings.isAllowedBaseUrl("http://192.168.1.20:8123"))
+        assertTrue(HomeAssistantSettings.isAllowedBaseUrl("http://homeassistant.local:8123"))
+        assertTrue(HomeAssistantSettings.isAllowedBaseUrl("http://ha-server:8123"))
+        assertFalse(HomeAssistantSettings.isAllowedBaseUrl("http://ha.example.com"))
+        assertFalse(HomeAssistantSettings.isAllowedBaseUrl("ftp://192.168.1.20"))
+    }
+
     @Test fun buildsWebhookUrlWithoutDuplicateSlash() {
         val settings = HomeAssistantSettings("https://ha.example/", "secret-id")
         assertEquals("https://ha.example/api/webhook/secret-id", settings.webhookUrl())

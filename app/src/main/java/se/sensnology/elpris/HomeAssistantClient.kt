@@ -75,7 +75,7 @@ object HomeAssistantClient {
 
     private fun request(settings: HomeAssistantSettings, command: HomeAssistantCommand): JSONObject {
         require(settings.configured) { "Home Assistant is not configured" }
-        require(settings.baseUrl.trim().startsWith("https://")) { "HTTPS is required" }
+        require(HomeAssistantSettings.isAllowedBaseUrl(settings.baseUrl)) { "HTTPS or a local HTTP address is required" }
         require(command.action in setOf("status", "schedule", "cancel", "start", "stop")) { "Unsupported action" }
 
         val body = payload(command)
@@ -85,6 +85,7 @@ object HomeAssistantClient {
             connection.requestMethod = "POST"
             connection.connectTimeout = 10_000
             connection.readTimeout = 15_000
+            connection.instanceFollowRedirects = false
             connection.doOutput = true
             connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
             connection.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }

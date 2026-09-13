@@ -46,7 +46,7 @@ Beräkningen utgår från 230 V enfas eller 400 V trefas och ideal laddningseffe
 
 Elpris kan skicka den beräknade laddperioden samt start-, stopp- och avbrytkommandon till den separata [Elpris charging control-integrationen](https://github.com/henrikekblad/elpris-home-assistant). Schemat sparas och utförs av Home Assistant och är därför inte beroende av att telefonen förblir ansluten.
 
-Installera integrationen genom HACS och välj laddarens styrentiteter. Öppna därefter integrationens entitet **Appanslutning** i Home Assistant och kopiera attributet `webhook_id`. Ange Home Assistants externt åtkomliga HTTPS-adress och detta webhook-ID under **Inställningar → Home Assistant** i Elpris och tryck **Testa anslutningen**. Appen lagrar varken lösenordet till ditt Home Assistant-konto eller någon generell åtkomsttoken.
+Installera integrationen genom HACS och välj laddarens styrentiteter. Öppna därefter integrationens entitet **Appanslutning** i Home Assistant och kopiera attributet `webhook_id`. Ange Home Assistant-adressen och detta webhook-ID under **Inställningar → Home Assistant** i Elpris och tryck **Testa anslutningen**. Internetadresser kräver HTTPS; privata lokala IP-adresser och lokala värdnamn kan använda HTTP. Appen lagrar varken lösenordet till ditt Home Assistant-konto eller någon generell åtkomsttoken.
 
 Under Elbil ställer **Starta nu** först in det amperetal som är valt i appen och aktiverar sedan laddningen. Schemaknappen visar om appens beräknade perioder är synkroniserade med Home Assistant eller behöver skickas/uppdateras.
 

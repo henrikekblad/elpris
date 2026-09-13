@@ -84,7 +84,7 @@ class LauncherActivity : Activity() {
         if (uri.scheme != "elpris" || uri.host != "home-assistant") return null
         val url = uri.getQueryParameter("url").orEmpty().trim()
         val webhook = uri.getQueryParameter("webhook").orEmpty().trim()
-        val valid = url.startsWith("https://") && webhook.isNotBlank()
+        val valid = HomeAssistantSettings.isAllowedBaseUrl(url) && webhook.isNotBlank()
         if (valid) HomeAssistantSettings.save(this, HomeAssistantSettings(url, webhook))
         return valid
     }

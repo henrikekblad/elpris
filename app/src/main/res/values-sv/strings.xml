@@ -82,7 +82,7 @@
   <string name="home_assistant">Home Assistant</string>
   <string name="home_assistant_intro">Anslut %1$s med dess privata webhook-ID. Anslutningen kan endast styra laddaren som valts i integrationen.</string>
   <string name="home_assistant_integration_link">Elpris-integrationen för Home Assistant</string>
-  <string name="home_assistant_url">Home Assistant-adress (HTTPS)</string>
+  <string name="home_assistant_url">Home Assistant-adress</string>
   <string name="home_assistant_webhook">Nytt privat webhook-ID (lämna tomt för att behålla sparat ID)</string>
   <string name="home_assistant_save">Spara anslutning</string>
   <string name="home_assistant_saved">Anslutningen har sparats</string>
@@ -93,8 +93,8 @@
   <string name="home_assistant_schedule_active">Ansluten · laddschema aktivt</string>
   <string name="home_assistant_charging_enabled">Ansluten · laddning aktiverad</string>
   <string name="home_assistant_paired">Home Assistant har parkopplats</string>
-  <string name="home_assistant_pairing_invalid">Parkopplingen misslyckades. Home Assistant måste ange en extern HTTPS-adress.</string>
-  <string name="home_assistant_https_required">En HTTPS-adress krävs.</string>
+  <string name="home_assistant_pairing_invalid">Parkopplingen misslyckades. Använd HTTPS eller HTTP med en privat lokal adress.</string>
+  <string name="home_assistant_address_required">Använd HTTPS eller HTTP med en privat lokal adress.</string>
   <string name="home_assistant_not_configured">Ange adress och webhook-ID först.</string>
   <string name="home_assistant_sending">Skickar…</string>
   <string name="home_assistant_sent">Skickat till Home Assistant</string>

@@ -82,7 +82,7 @@
   <string name="home_assistant">Home Assistant</string>
   <string name="home_assistant_intro">Yhdistä %1$s sen yksityisellä webhook-tunnuksella. Yhteys voi ohjata vain integraatiossa valittua laturia.</string>
   <string name="home_assistant_integration_link">Home Assistantin Elpris-integraatio</string>
-  <string name="home_assistant_url">Home Assistant -osoite (HTTPS)</string>
+  <string name="home_assistant_url">Home Assistant -osoite</string>
   <string name="home_assistant_webhook">Uusi yksityinen webhook-tunnus (jätä tyhjäksi säilyttääksesi tallennetun)</string>
   <string name="home_assistant_save">Tallenna yhteys</string>
   <string name="home_assistant_saved">Yhteys tallennettu</string>
@@ -93,8 +93,8 @@
   <string name="home_assistant_schedule_active">Yhdistetty · latausaikataulu aktiivinen</string>
   <string name="home_assistant_charging_enabled">Yhdistetty · lataus käytössä</string>
   <string name="home_assistant_paired">Home Assistant on paritettu</string>
-  <string name="home_assistant_pairing_invalid">Paritus epäonnistui. Home Assistantin on annettava ulkoinen HTTPS-osoite.</string>
-  <string name="home_assistant_https_required">HTTPS-osoite vaaditaan.</string>
+  <string name="home_assistant_pairing_invalid">Paritus epäonnistui. Käytä HTTPS:ää tai HTTP:tä yksityisellä paikallisella osoitteella.</string>
+  <string name="home_assistant_address_required">Käytä HTTPS:ää tai HTTP:tä yksityisellä paikallisella osoitteella.</string>
   <string name="home_assistant_not_configured">Anna ensin osoite ja webhook-tunnus.</string>
   <string name="home_assistant_sending">Lähetetään…</string>
   <string name="home_assistant_sent">Lähetetty Home Assistantiin</string>

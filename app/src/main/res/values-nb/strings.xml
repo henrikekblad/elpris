@@ -82,7 +82,7 @@
   <string name="home_assistant">Home Assistant</string>
   <string name="home_assistant_intro">Koble til %1$s med den private webhook-ID-en. Tilkoblingen kan bare styre laderen som er valgt i integrasjonen.</string>
   <string name="home_assistant_integration_link">Elpris-integrasjonen for Home Assistant</string>
-  <string name="home_assistant_url">Home Assistant-adresse (HTTPS)</string>
+  <string name="home_assistant_url">Home Assistant-adresse</string>
   <string name="home_assistant_webhook">Ny privat webhook-ID (la stå tomt for å beholde den lagrede)</string>
   <string name="home_assistant_save">Lagre tilkobling</string>
   <string name="home_assistant_saved">Tilkoblingen er lagret</string>
@@ -93,8 +93,8 @@
   <string name="home_assistant_schedule_active">Tilkoblet · ladeplan aktiv</string>
   <string name="home_assistant_charging_enabled">Tilkoblet · lading aktivert</string>
   <string name="home_assistant_paired">Home Assistant er paret</string>
-  <string name="home_assistant_pairing_invalid">Paringen mislyktes. Home Assistant må oppgi en ekstern HTTPS-adresse.</string>
-  <string name="home_assistant_https_required">En HTTPS-adresse kreves.</string>
+  <string name="home_assistant_pairing_invalid">Paringen mislyktes. Bruk HTTPS eller HTTP med en privat lokal adresse.</string>
+  <string name="home_assistant_address_required">Bruk HTTPS eller HTTP med en privat lokal adresse.</string>
   <string name="home_assistant_not_configured">Angi adresse og webhook-ID først.</string>
   <string name="home_assistant_sending">Sender…</string>
   <string name="home_assistant_sent">Sendt til Home Assistant</string>

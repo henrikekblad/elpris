@@ -62,7 +62,7 @@ VAT is applied last and follows the selected market. Suggested tax values are ed
 
 Elpris can send its calculated charging period, start, stop and cancel commands to the separate [Elpris charging control integration](https://github.com/henrikekblad/elpris-home-assistant). Home Assistant stores and executes the schedule, so it does not depend on the phone remaining online.
 
-Install the integration through HACS and select the charger controls during setup. In Home Assistant, open the integration's **App connection** entity and copy its `webhook_id` attribute. Then enter the external Home Assistant HTTPS address and webhook ID under **Settings → Home Assistant** in Elpris and tap **Test connection**. No Home Assistant account password or general access token is stored in the app.
+Install the integration through HACS and select the charger controls during setup. In Home Assistant, open the integration's **App connection** entity and copy its `webhook_id` attribute. Then enter the Home Assistant address and webhook ID under **Settings → Home Assistant** in Elpris and tap **Test connection**. HTTPS is required for internet addresses; private local IP addresses and local hostnames may use HTTP. No Home Assistant account password or general access token is stored in the app.
 
 In the EV tab, **Start now** applies the currently selected amperage before enabling charging. The schedule button shows whether the calculated periods are synchronized with Home Assistant or need to be sent or updated.
 
