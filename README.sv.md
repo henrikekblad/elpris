@@ -42,7 +42,7 @@ På fliken **Elbil** väljer du en- eller trefasladdning (6–16 A), bilens unge
 
 Beräkningen utgår från 230 V enfas eller 400 V trefas och ideal laddningseffekt. Verklig effekt, laddförlust och bilens laddkurva kan göra laddningen något långsammare. Tider och kostnader är därför ungefärliga.
 
-### Home Assistant-styrning (förhandsversion)
+### Home Assistant-styrning
 
 Elpris kan skicka den beräknade laddperioden samt start-, stopp- och avbrytkommandon till den separata [Elpris charging control-integrationen](https://github.com/henrikekblad/elpris-home-assistant). Schemat sparas och utförs av Home Assistant och är därför inte beroende av att telefonen förblir ansluten.
 

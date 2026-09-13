@@ -21,8 +21,8 @@ android {
         applicationId = "se.sensnology.elpris"
         minSdk = 26
         targetSdk = 36
-        versionCode = 5
-        versionName = "1.3.2"
+        versionCode = 6
+        versionName = "1.4.0"
     }
 
     if (hasReleaseSigning) {
