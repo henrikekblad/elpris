@@ -67,6 +67,11 @@ class WidgetConfigActivity : Activity() {
         setContentView(root)
         showSettings(editing)
         selectTab(0)
+        if (intent.hasExtra(EXTRA_HOME_ASSISTANT_PAIRING)) {
+            val message = if (intent.getBooleanExtra(EXTRA_HOME_ASSISTANT_PAIRING, false))
+                t(R.string.home_assistant_paired) else t(R.string.home_assistant_pairing_invalid)
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun showSettings(editing: Boolean) {
@@ -74,6 +79,7 @@ class WidgetConfigActivity : Activity() {
         scrollView.setOnScrollChangeListener(null as View.OnScrollChangeListener?)
         content.removeAllViews()
         val old = WidgetSettings.load(this, widgetId)
+        content.addView(sectionTitle(t(R.string.section_general)))
         content.addView(label(t(R.string.language)))
         val language = Spinner(this).apply {
             adapter = ArrayAdapter(this@WidgetConfigActivity, android.R.layout.simple_spinner_dropdown_item,
@@ -91,6 +97,25 @@ class WidgetConfigActivity : Activity() {
             }
         }
         content.addView(language)
+        content.addView(label(t(R.string.theme)))
+        val themeModes = listOf(AppThemeSettings.SYSTEM, AppThemeSettings.LIGHT, AppThemeSettings.DARK)
+        val theme = Spinner(this).apply {
+            adapter = ArrayAdapter(this@WidgetConfigActivity, android.R.layout.simple_spinner_dropdown_item,
+                listOf(t(R.string.system), t(R.string.light), t(R.string.dark)))
+            setSelection(themeModes.indexOf(AppThemeSettings.mode(this@WidgetConfigActivity)).coerceAtLeast(0))
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val selected = themeModes[position]
+                    if (selected != AppThemeSettings.mode(this@WidgetConfigActivity)) {
+                        AppThemeSettings.save(this@WidgetConfigActivity, selected)
+                        recreate()
+                    }
+                }
+            }
+        }
+        content.addView(theme)
+        content.addView(sectionTitle(t(R.string.section_electricity_price)))
         content.addView(label(t(R.string.area)))
         data class AreaChoice(val label: String, val code: String? = null) {
             override fun toString() = label
@@ -122,24 +147,6 @@ class WidgetConfigActivity : Activity() {
                 ?: areaChoices.indexOfFirst { it.code == "SE4" })
         }
         content.addView(area)
-        content.addView(label(t(R.string.theme)))
-        val themeModes = listOf(AppThemeSettings.SYSTEM, AppThemeSettings.LIGHT, AppThemeSettings.DARK)
-        val theme = Spinner(this).apply {
-            adapter = ArrayAdapter(this@WidgetConfigActivity, android.R.layout.simple_spinner_dropdown_item,
-                listOf(t(R.string.system), t(R.string.light), t(R.string.dark)))
-            setSelection(themeModes.indexOf(AppThemeSettings.mode(this@WidgetConfigActivity)).coerceAtLeast(0))
-            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onNothingSelected(parent: AdapterView<*>?) = Unit
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    val selected = themeModes[position]
-                    if (selected != AppThemeSettings.mode(this@WidgetConfigActivity)) {
-                        AppThemeSettings.save(this@WidgetConfigActivity, selected)
-                        recreate()
-                    }
-                }
-            }
-        }
-        content.addView(theme)
         content.addView(label(t(R.string.resolution)))
         val interval = RadioGroup(this).apply { orientation = RadioGroup.HORIZONTAL }
         val quarterText = t(R.string.quarter)
@@ -196,6 +203,7 @@ class WidgetConfigActivity : Activity() {
                 } else Toast.makeText(this@WidgetConfigActivity, t(R.string.updated), Toast.LENGTH_SHORT).show()
             }
         }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(54)).apply { topMargin = dp(20) })
+        addHomeAssistantSettings()
     }
 
     private fun showCharging() {
@@ -207,6 +215,9 @@ class WidgetConfigActivity : Activity() {
             text = t(R.string.planner_intro)
             textSize = 15f; setTextColor(muted); setPadding(0, dp(8), 0, dp(12))
         })
+        var currentPlan: ChargingPlan? = null
+        val homeAssistantControls = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        if (HomeAssistantSettings.load(this).configured) content.addView(homeAssistantControls)
         val resultBox = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(16), dp(14), dp(16), dp(14))
@@ -263,7 +274,6 @@ class WidgetConfigActivity : Activity() {
         val status = TextView(this).apply { textSize = 13f; setTextColor(muted); setPadding(0, dp(8), 0, 0) }
         content.addView(status)
 
-        var prices: PriceResult? = null
         fun currentSettings() = settings.copy(
             chargingPhases = selectedPhases(),
             chargingAmps = amps.progress + 6,
@@ -274,9 +284,14 @@ class WidgetConfigActivity : Activity() {
             departureHour = departureHour,
             departureMinute = departureMinute
         )
+
+        addHomeAssistantControls(homeAssistantControls, generation, ::currentSettings) { currentPlan }
+
+        var prices: PriceResult? = null
         fun render() {
             settings = currentSettings()
             val plan = prices?.let { ChargingPlanner.calculate(it, settings) }
+            currentPlan = plan
             if (plan == null) {
                 val durationMinutes = ChargingPlanner.durationMinutes(settings)
                 val localNow = OffsetDateTime.now()
@@ -359,6 +374,158 @@ class WidgetConfigActivity : Activity() {
     private fun saveCharging(value: WidgetSettings) {
         WidgetSettings.save(this, widgetId, value)
         PriceWidgetProvider.update(this, AppWidgetManager.getInstance(this), widgetId)
+    }
+
+    private fun addHomeAssistantSettings() {
+        content.addView(sectionTitle(t(R.string.home_assistant)))
+        content.addView(TextView(this).apply {
+            text = t(R.string.home_assistant_intro)
+            textSize = 13f; setTextColor(muted); setPadding(0, 0, 0, dp(6))
+        })
+        val saved = HomeAssistantSettings.load(this)
+        val url = EditText(this).apply {
+            hint = t(R.string.home_assistant_url)
+            setText(saved.baseUrl)
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
+            isSingleLine = true
+        }
+        val webhookId = EditText(this).apply {
+            hint = t(R.string.home_assistant_webhook)
+            setText(saved.webhookId)
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            isSingleLine = true
+        }
+        val status = TextView(this).apply {
+            textSize = 13f; setTextColor(muted); setPadding(0, dp(6), 0, 0)
+        }
+        content.addView(url)
+        content.addView(webhookId)
+        content.addView(Button(this).apply {
+            text = t(R.string.home_assistant_save); isAllCaps = false
+            setOnClickListener {
+                val entered = HomeAssistantSettings(url.text.toString(), webhookId.text.toString())
+                if (entered.configured && !entered.baseUrl.startsWith("https://")) {
+                    status.text = t(R.string.home_assistant_https_required)
+                    status.setTextColor(0xFFD65C5C.toInt())
+                } else {
+                    HomeAssistantSettings.save(this@WidgetConfigActivity, entered)
+                    status.text = t(R.string.home_assistant_saved)
+                    status.setTextColor(accent)
+                }
+            }
+        }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48)))
+        content.addView(Button(this).apply {
+            text = t(R.string.home_assistant_check); isAllCaps = false
+            setOnClickListener {
+                val entered = HomeAssistantSettings(url.text.toString(), webhookId.text.toString())
+                if (!entered.configured || !entered.baseUrl.startsWith("https://")) {
+                    status.text = t(R.string.home_assistant_https_required)
+                    status.setTextColor(0xFFD65C5C.toInt())
+                    return@setOnClickListener
+                }
+                status.text = t(R.string.home_assistant_checking)
+                status.setTextColor(muted)
+                ioExecutor.execute {
+                    val result = runCatching { HomeAssistantClient.status(entered) }
+                    runOnUiThread {
+                        if (isDestroyed) return@runOnUiThread
+                        status.text = if (result.isSuccess) t(R.string.home_assistant_connection_ok)
+                            else t(R.string.home_assistant_error, result.exceptionOrNull()?.message ?: "")
+                        status.setTextColor(if (result.isSuccess) accent else 0xFFD65C5C.toInt())
+                    }
+                }
+            }
+        }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48)))
+        content.addView(status)
+    }
+
+    private fun addHomeAssistantControls(
+        parent: LinearLayout,
+        generation: Int,
+        currentSettings: () -> WidgetSettings,
+        currentPlan: () -> ChargingPlan?
+    ) {
+        val connection = HomeAssistantSettings.load(this)
+        if (!connection.configured) return
+        parent.addView(sectionTitle(t(R.string.home_assistant)))
+        val status = TextView(this).apply {
+            text = t(R.string.home_assistant_checking)
+            textSize = 13f; setTextColor(muted); setPadding(0, 0, 0, dp(4))
+        }
+        parent.addView(status)
+        ioExecutor.execute {
+            val result = runCatching { HomeAssistantClient.status(connection) }
+            runOnUiThread {
+                if (isDestroyed || generation != viewGeneration) return@runOnUiThread
+                status.text = result.fold(
+                    onSuccess = {
+                        when {
+                            it.scheduleActive -> t(R.string.home_assistant_schedule_active)
+                            it.chargingEnabled -> t(R.string.home_assistant_charging_enabled)
+                            else -> t(R.string.home_assistant_connection_ok)
+                        }
+                    },
+                    onFailure = { t(R.string.home_assistant_error, it.message ?: "") }
+                )
+                status.setTextColor(if (result.isSuccess) muted else 0xFFD65C5C.toInt())
+            }
+        }
+        fun send(command: HomeAssistantCommand) {
+            status.text = t(R.string.home_assistant_sending)
+            status.setTextColor(muted)
+            ioExecutor.execute {
+                val error = runCatching { HomeAssistantClient.send(connection, command) }.exceptionOrNull()
+                runOnUiThread {
+                    if (isDestroyed || generation != viewGeneration) return@runOnUiThread
+                    status.text = if (error == null) t(R.string.home_assistant_sent)
+                        else t(R.string.home_assistant_error, error.message ?: "")
+                    status.setTextColor(if (error == null) accent else 0xFFD65C5C.toInt())
+                }
+            }
+        }
+        val actions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        actions.addView(Button(this).apply {
+            text = t(R.string.home_assistant_start); isAllCaps = false
+            setOnClickListener {
+                val value = currentSettings()
+                send(HomeAssistantCommand("start", amps = value.chargingAmps, phases = value.chargingPhases))
+            }
+        }, weight())
+        actions.addView(Button(this).apply {
+            text = t(R.string.home_assistant_stop); isAllCaps = false
+            setOnClickListener { send(HomeAssistantCommand("stop")) }
+        }, weight())
+        parent.addView(actions)
+        parent.addView(Button(this).apply {
+            text = t(R.string.home_assistant_schedule); isAllCaps = false
+            setOnClickListener {
+                val plan = currentPlan()
+                if (plan == null) {
+                    status.text = t(R.string.home_assistant_no_plan)
+                    status.setTextColor(0xFFD65C5C.toInt())
+                } else {
+                    val value = currentSettings()
+                    send(HomeAssistantCommand(
+                        action = "schedule", start = plan.start.toString(), end = plan.end.toString(),
+                        amps = value.chargingAmps, phases = value.chargingPhases,
+                        powerKw = plan.powerKw, energyKwh = plan.energyKwh,
+                        priceArea = value.area, estimated = plan.estimatedPriceSlots > 0
+                    ))
+                }
+            }
+        }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48)))
+        parent.addView(Button(this).apply {
+            text = t(R.string.home_assistant_cancel); isAllCaps = false
+            setOnClickListener { send(HomeAssistantCommand("cancel")) }
+        }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48)))
+    }
+
+    private fun sectionTitle(text: String) = TextView(this).apply {
+        this.text = text
+        textSize = 18f
+        setTextColor(dark)
+        typeface = Typeface.DEFAULT_BOLD
+        setPadding(0, dp(18), 0, dp(4))
     }
 
     private fun slider(title: String, min: Int, max: Int, value: Int, valueView: TextView, updateValue: (Int) -> Unit): SeekBar {
@@ -505,5 +672,8 @@ class WidgetConfigActivity : Activity() {
         super.onDestroy()
     }
 
-    companion object { const val EXTRA_EXISTING_WIDGET = "existing_widget" }
+    companion object {
+        const val EXTRA_EXISTING_WIDGET = "existing_widget"
+        const val EXTRA_HOME_ASSISTANT_PAIRING = "home_assistant_pairing"
+    }
 }

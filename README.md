@@ -58,6 +58,14 @@ The API value is a spot price without VAT, electricity tax or grid fees. Enabled
 
 VAT is applied last and follows the selected market. Suggested tax values are editable. Grid fees vary by provider, tariff and agreement, so users should verify all values against their local rules and electricity contract. Fixed monthly charges are not included.
 
+## Home Assistant charging control (preview)
+
+Elpris can send its calculated charging period, start, stop and cancel commands to the separate [Elpris charging control integration](https://github.com/henrikekblad/elpris-home-assistant). Home Assistant stores and executes the schedule, so it does not depend on the phone remaining online.
+
+Install the integration through HACS, select the charger controls during setup, then enter the external Home Assistant HTTPS address and private webhook ID under **Settings → Home Assistant** in Elpris. No Home Assistant account password or general access token is stored in the app.
+
+The webhook ID is a secret. It is deliberately limited to the charger selected in the integration and accepts only schedule, cancel, start and stop operations.
+
 ## Build locally
 
 Requirements:

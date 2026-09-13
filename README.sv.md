@@ -42,6 +42,14 @@ På fliken **Elbil** väljer du en- eller trefasladdning (6–16 A), bilens unge
 
 Beräkningen utgår från 230 V enfas eller 400 V trefas och ideal laddningseffekt. Verklig effekt, laddförlust och bilens laddkurva kan göra laddningen något långsammare. Tider och kostnader är därför ungefärliga.
 
+### Home Assistant-styrning (förhandsversion)
+
+Elpris kan skicka den beräknade laddperioden samt start-, stopp- och avbrytkommandon till den separata [Elpris charging control-integrationen](https://github.com/henrikekblad/elpris-home-assistant). Schemat sparas och utförs av Home Assistant och är därför inte beroende av att telefonen förblir ansluten.
+
+Installera integrationen genom HACS, välj laddarens styrentiteter under konfigurationen och ange sedan Home Assistants externt åtkomliga HTTPS-adress och privata webhook-ID under **Inställningar → Home Assistant** i Elpris. Appen lagrar varken lösenordet till ditt Home Assistant-konto eller någon generell åtkomsttoken.
+
+Webhook-ID:t är hemligt. Det är avsiktligt begränsat till laddaren som valts i integrationen och tar bara emot kommandon för schema, avbryt, start och stopp.
+
 <p align="center">
   <img src="assets/charge.jpg" alt="Elbilsplanering med laddström, förbrukning, energimängd, avresetid och rekommenderad laddperiod" width="360">
 </p>

@@ -16,6 +16,10 @@ class LauncherActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         AppThemeSettings.apply(this)
         super.onCreate(savedInstanceState)
+        handleHomeAssistantPairing(intent)?.let { paired ->
+            open(STANDALONE_SETTINGS_ID, paired)
+            return
+        }
         val manager = AppWidgetManager.getInstance(this)
         val ids = manager.getAppWidgetIds(ComponentName(this, PriceWidgetProvider::class.java))
         val preferred = preferredWidgetId(this)
@@ -65,13 +69,24 @@ class LauncherActivity : Activity() {
         setContentView(root)
     }
 
-    private fun open(id: Int) {
+    private fun open(id: Int, pairingResult: Boolean? = null) {
         if (id > 0) rememberWidget(this, id)
         startActivity(Intent(this, WidgetConfigActivity::class.java).apply {
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
             putExtra(WidgetConfigActivity.EXTRA_EXISTING_WIDGET, true)
+            pairingResult?.let { putExtra(WidgetConfigActivity.EXTRA_HOME_ASSISTANT_PAIRING, it) }
         })
         finish()
+    }
+
+    private fun handleHomeAssistantPairing(intent: Intent): Boolean? {
+        val uri = intent.data ?: return null
+        if (uri.scheme != "elpris" || uri.host != "home-assistant") return null
+        val url = uri.getQueryParameter("url").orEmpty().trim()
+        val webhook = uri.getQueryParameter("webhook").orEmpty().trim()
+        val valid = url.startsWith("https://") && webhook.isNotBlank()
+        if (valid) HomeAssistantSettings.save(this, HomeAssistantSettings(url, webhook))
+        return valid
     }
 
     private fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()
