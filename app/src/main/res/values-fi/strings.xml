@@ -82,7 +82,7 @@
   <string name="home_assistant">Home Assistant</string>
   <string name="home_assistant_intro">Yhdistä Home Assistantin Elpris-integraatio sen yksityisellä webhook-tunnuksella. Yhteys voi ohjata vain integraatiossa valittua laturia.</string>
   <string name="home_assistant_url">Home Assistant -osoite (HTTPS)</string>
-  <string name="home_assistant_webhook">Yksityinen webhook-tunnus</string>
+  <string name="home_assistant_webhook">Uusi yksityinen webhook-tunnus (jätä tyhjäksi säilyttääksesi tallennetun)</string>
   <string name="home_assistant_save">Tallenna yhteys</string>
   <string name="home_assistant_saved">Yhteys tallennettu</string>
   <string name="home_assistant_connected">Yhdistetty. Ohjaus ja latausaikataulut lähetetään suoraan Home Assistantiin.</string>

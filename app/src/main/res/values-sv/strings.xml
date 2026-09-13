@@ -82,7 +82,7 @@
   <string name="home_assistant">Home Assistant</string>
   <string name="home_assistant_intro">Anslut Elpris-integrationen för Home Assistant med dess privata webhook-ID. Anslutningen kan endast styra laddaren som valts i integrationen.</string>
   <string name="home_assistant_url">Home Assistant-adress (HTTPS)</string>
-  <string name="home_assistant_webhook">Privat webhook-ID</string>
+  <string name="home_assistant_webhook">Nytt privat webhook-ID (lämna tomt för att behålla sparat ID)</string>
   <string name="home_assistant_save">Spara anslutning</string>
   <string name="home_assistant_saved">Anslutningen har sparats</string>
   <string name="home_assistant_connected">Ansluten. Styrning och laddscheman skickas direkt till Home Assistant.</string>

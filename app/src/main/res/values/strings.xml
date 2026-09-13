@@ -87,7 +87,7 @@
   <string name="home_assistant">Home Assistant</string>
   <string name="home_assistant_intro">Connect the Elpris integration for Home Assistant using its private webhook ID. The connection can only control the charger configured in the integration.</string>
   <string name="home_assistant_url">Home Assistant URL (HTTPS)</string>
-  <string name="home_assistant_webhook">Private webhook ID</string>
+  <string name="home_assistant_webhook">New private webhook ID (leave blank to keep saved ID)</string>
   <string name="home_assistant_save">Save connection</string>
   <string name="home_assistant_saved">Connection saved</string>
   <string name="home_assistant_connected">Connected. Control and schedules are sent directly to Home Assistant.</string>

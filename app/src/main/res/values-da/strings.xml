@@ -82,7 +82,7 @@
   <string name="home_assistant">Home Assistant</string>
   <string name="home_assistant_intro">Forbind Elpris-integrationen til Home Assistant med dens private webhook-id. Forbindelsen kan kun styre den lader, der er valgt i integrationen.</string>
   <string name="home_assistant_url">Home Assistant-adresse (HTTPS)</string>
-  <string name="home_assistant_webhook">Privat webhook-id</string>
+  <string name="home_assistant_webhook">Nyt privat webhook-id (lad stå tomt for at beholde det gemte)</string>
   <string name="home_assistant_save">Gem forbindelse</string>
   <string name="home_assistant_saved">Forbindelsen er gemt</string>
   <string name="home_assistant_connected">Forbundet. Styring og ladeplaner sendes direkte til Home Assistant.</string>

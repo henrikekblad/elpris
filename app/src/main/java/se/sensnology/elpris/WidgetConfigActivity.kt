@@ -403,11 +403,14 @@ class WidgetConfigActivity : Activity() {
         }
         val webhookId = EditText(this).apply {
             hint = t(R.string.home_assistant_webhook)
-            setText(saved.webhookId)
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
             transformationMethod = PasswordTransformationMethod.getInstance()
             isSingleLine = true
         }
+        fun enteredSettings() = HomeAssistantSettings(
+            url.text.toString(),
+            webhookId.text.toString().ifBlank { saved.webhookId }
+        )
         val status = TextView(this).apply {
             textSize = 13f; setTextColor(muted); setPadding(0, dp(6), 0, 0)
         }
@@ -416,7 +419,7 @@ class WidgetConfigActivity : Activity() {
         content.addView(Button(this).apply {
             text = t(R.string.home_assistant_save); isAllCaps = false
             setOnClickListener {
-                val entered = HomeAssistantSettings(url.text.toString(), webhookId.text.toString())
+                val entered = enteredSettings()
                 if (entered.configured && !entered.baseUrl.startsWith("https://")) {
                     status.text = t(R.string.home_assistant_https_required)
                     status.setTextColor(0xFFD65C5C.toInt())
@@ -430,7 +433,7 @@ class WidgetConfigActivity : Activity() {
         content.addView(Button(this).apply {
             text = t(R.string.home_assistant_check); isAllCaps = false
             setOnClickListener {
-                val entered = HomeAssistantSettings(url.text.toString(), webhookId.text.toString())
+                val entered = enteredSettings()
                 if (!entered.configured || !entered.baseUrl.startsWith("https://")) {
                     status.text = t(R.string.home_assistant_https_required)
                     status.setTextColor(0xFFD65C5C.toInt())
