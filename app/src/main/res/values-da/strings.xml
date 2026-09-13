@@ -51,7 +51,9 @@
   <string name="updated">Widgetten opdateres</string>
   <string name="saved">Gemt</string>
   <string name="saved_updated">Gemt, og widgetten opdateres</string>
-  <string name="planner_intro">Find den billigste sammenhængende ladetid i det næste døgn.</string>
+  <string name="planner_intro">Find de billigste ladetider i det næste døgn. Opladningen kan opdeles i det valgte maksimale antal perioder.</string>
+  <string name="max_charging_periods">Maksimalt antal ladeperioder</string>
+  <string name="charging_period_count">%1$d perioder</string>
   <string name="misses_departure">Kan ikke nås før afgang</string>
   <string name="no_plan">Ladetiden kan ikke beregnes</string>
   <string name="not_enough_prices">Der er ikke tilstrækkelige prisdata til at beregne en ladetid.</string>

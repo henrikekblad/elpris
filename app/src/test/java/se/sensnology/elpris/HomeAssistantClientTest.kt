@@ -43,4 +43,21 @@ class HomeAssistantClientTest {
         assertNull(status.start)
         assertNull(status.end)
     }
+
+    @Test fun schedulePayloadContainsAllChargingPeriods() {
+        val periods = listOf(
+            ChargingPeriod(
+                java.time.OffsetDateTime.parse("2026-09-14T01:00:00+02:00"),
+                java.time.OffsetDateTime.parse("2026-09-14T01:30:00+02:00")
+            ),
+            ChargingPeriod(
+                java.time.OffsetDateTime.parse("2026-09-14T03:00:00+02:00"),
+                java.time.OffsetDateTime.parse("2026-09-14T03:30:00+02:00")
+            )
+        )
+        val json = JSONObject(HomeAssistantClient.payload(HomeAssistantCommand("schedule", periods = periods)))
+
+        assertEquals(2, json.getJSONArray("periods").length())
+        assertEquals("2026-09-14T03:00+02:00", json.getJSONArray("periods").getJSONObject(1).getString("start"))
+    }
 }

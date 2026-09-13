@@ -13,7 +13,8 @@ data class HomeAssistantCommand(
     val powerKw: Double? = null,
     val energyKwh: Double? = null,
     val priceArea: String? = null,
-    val estimated: Boolean? = null
+    val estimated: Boolean? = null,
+    val periods: List<ChargingPeriod>? = null
 )
 
 data class HomeAssistantStatus(
@@ -35,6 +36,14 @@ object HomeAssistantClient {
         command.energyKwh?.let { put("energy_kwh", it) }
         command.priceArea?.let { put("price_area", it) }
         command.estimated?.let { put("estimated", it) }
+        command.periods?.let { periods ->
+            put("periods", org.json.JSONArray().apply {
+                periods.forEach { period -> put(JSONObject().apply {
+                    put("start", period.start.toString())
+                    put("end", period.end.toString())
+                }) }
+            })
+        }
     }.toString()
 
     fun send(settings: HomeAssistantSettings, command: HomeAssistantCommand) {

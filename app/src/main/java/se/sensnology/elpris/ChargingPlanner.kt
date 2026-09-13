@@ -1,10 +1,12 @@
 package se.sensnology.elpris
 
-import java.time.Duration
 import java.time.OffsetDateTime
 import java.time.LocalTime
 import kotlin.math.ceil
 import kotlin.math.sqrt
+import java.util.BitSet
+
+data class ChargingPeriod(val start: OffsetDateTime, val end: OffsetDateTime)
 
 data class ChargingPlan(
     val start: OffsetDateTime,
@@ -13,7 +15,8 @@ data class ChargingPlan(
     val energyKwh: Double,
     val distanceMil: Double,
     val estimatedCost: Double,
-    val estimatedPriceSlots: Int
+    val estimatedPriceSlots: Int,
+    val periods: List<ChargingPeriod> = listOf(ChargingPeriod(start, end))
 )
 
 object ChargingPlanner {
@@ -80,30 +83,47 @@ object ChargingPlanner {
         val plannedEnergy = slotsNeeded * energyPerSlot
         if (points.size < slotsNeeded) return null
 
-        var bestIndex = -1
-        var bestCost = Double.POSITIVE_INFINITY
-        for (startIndex in 0..points.size - slotsNeeded) {
-            val slice = points.subList(startIndex, startIndex + slotsNeeded)
-            val contiguous = slice.zipWithNext().all { (a, b) ->
-                Duration.between(a.point.start, b.point.start).toMinutes() == slotMinutes
+        data class State(val selected: Int, val runs: Int, val active: Boolean)
+        data class Choice(val cost: Double, val slots: BitSet)
+        var states = mapOf(State(0, 0, false) to Choice(0.0, BitSet()))
+        points.forEachIndexed { index, planningPoint ->
+            val next = mutableMapOf<State, Choice>()
+            fun keep(state: State, choice: Choice) {
+                if (choice.cost < (next[state]?.cost ?: Double.POSITIVE_INFINITY)) next[state] = choice
             }
-            if (!contiguous || slice.first().point.start >= latestStartExclusive) continue
-            if (departure != null && slice.last().point.start.plusMinutes(slotMinutes) > departure) continue
-            var costOre = 0.0
-            slice.forEach { point ->
-                costOre += energyPerSlot * settings.apply(point.point.spotPricePerKwh)
+            states.forEach { (state, choice) ->
+                keep(state.copy(active = false), choice)
+                val newRuns = state.runs + if (state.active) 0 else 1
+                val beforeDeparture = departure == null || planningPoint.point.start.plusMinutes(slotMinutes) <= departure
+                if (beforeDeparture && state.selected < slotsNeeded && newRuns <= settings.maxChargingPeriods.coerceIn(1, 8)) {
+                    val selectedSlots = choice.slots.clone() as BitSet
+                    selectedSlots.set(index)
+                    keep(
+                        State(state.selected + 1, newRuns, true),
+                        Choice(choice.cost + energyPerSlot * settings.apply(planningPoint.point.spotPricePerKwh), selectedSlots)
+                    )
+                }
             }
-            if (costOre < bestCost) { bestCost = costOre; bestIndex = startIndex }
+            states = next
         }
-        if (bestIndex < 0) return null
-        val selected = points.subList(bestIndex, bestIndex + slotsNeeded)
-        val start = selected.first().point.start
-        val end = start.plusMinutes(slotsNeeded * slotMinutes)
+        val best = states.filterKeys { it.selected == slotsNeeded }.minByOrNull { it.value.cost }?.value ?: return null
+        val selected = points.filterIndexed { index, _ -> best.slots[index] }
+        val periods = buildList<ChargingPeriod> {
+            selected.forEach { item ->
+                val previous = lastOrNull()
+                if (previous != null && previous.end.toInstant() == item.point.start.toInstant()) {
+                    this[lastIndex] = previous.copy(end = item.point.start.plusMinutes(slotMinutes))
+                } else add(ChargingPeriod(item.point.start, item.point.start.plusMinutes(slotMinutes)))
+            }
+        }
+        val start = periods.first().start
+        val end = periods.last().end
         return ChargingPlan(
             start, end, power, plannedEnergy,
             plannedEnergy / settings.consumptionKwhPerMil.coerceAtLeast(0.1),
-            bestCost / 100.0,
-            selected.count { it.estimated }
+            best.cost / 100.0,
+            selected.count { it.estimated },
+            periods
         )
     }
 }

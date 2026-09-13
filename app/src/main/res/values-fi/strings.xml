@@ -51,7 +51,9 @@
   <string name="updated">Widget päivitetään</string>
   <string name="saved">Tallennettu</string>
   <string name="saved_updated">Tallennettu, ja widget päivitetään</string>
-  <string name="planner_intro">Etsi seuraavan vuorokauden halvin yhtäjaksoinen latausaika.</string>
+  <string name="planner_intro">Etsi seuraavan vuorokauden halvimmat latausajat. Lataus voidaan jakaa valittuun enimmäismäärään jaksoja.</string>
+  <string name="max_charging_periods">Latausjaksojen enimmäismäärä</string>
+  <string name="charging_period_count">%1$d jaksoa</string>
   <string name="misses_departure">Ei valmistu ennen lähtöä</string>
   <string name="no_plan">Latausaikaa ei voida laskea</string>
   <string name="not_enough_prices">Latausajan laskemiseen ei ole riittävästi hintatietoja.</string>

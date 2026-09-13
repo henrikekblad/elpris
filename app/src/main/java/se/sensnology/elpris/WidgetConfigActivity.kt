@@ -259,6 +259,10 @@ class WidgetConfigActivity : Activity() {
         val energy = slider(t(R.string.charging), 1, 100, settings.chargingKwh, energyValue) { value ->
             energyValue.text = t(R.string.energy_value_integer, value)
         }
+        val periodsValue = valueLabel()
+        val periods = slider(t(R.string.max_charging_periods), 1, 8, settings.maxChargingPeriods, periodsValue) { value ->
+            periodsValue.text = value.toString()
+        }
         var departureHour = settings.departureHour
         var departureMinute = settings.departureMinute
         val useDeparture = checkbox(t(R.string.departure_check), settings.useDepartureTime)
@@ -279,6 +283,7 @@ class WidgetConfigActivity : Activity() {
             chargingAmps = amps.progress + 6,
             consumptionKwhPerMil = (consumption.progress + 10) / 10.0,
             chargingKwh = energy.progress + 1,
+            maxChargingPeriods = periods.progress + 1,
             showChargingPlan = showInWidget.isChecked,
             useDepartureTime = useDeparture.isChecked,
             departureHour = departureHour,
@@ -317,9 +322,11 @@ class WidgetConfigActivity : Activity() {
                 }
             } else {
                 val locale = AppLanguageSettings.locale(this)
-                resultTitle.text = t(R.string.charging_window,
-                    plan.start.format(DateTimeFormatter.ofPattern("EEE HH:mm", locale)),
-                    plan.end.format(DateTimeFormatter.ofPattern("EEE HH:mm", locale)))
+                resultTitle.text = plan.periods.joinToString("\n") { period ->
+                    t(R.string.charging_window,
+                        period.start.format(DateTimeFormatter.ofPattern("EEE HH:mm", locale)),
+                        period.end.format(DateTimeFormatter.ofPattern("EEE HH:mm", locale)))
+                }
                 val estimated = plan.estimatedPriceSlots > 0
                 val currency = PriceMarkets.find(settings.area).currency
                 costValue.text = if (estimated) "${t(R.string.estimated)} %.2f %s".format(plan.estimatedCost, currency) else "${t(R.string.approximately)} %.2f %s".format(plan.estimatedCost, currency)
@@ -339,12 +346,14 @@ class WidgetConfigActivity : Activity() {
                 ampsValue.text = t(R.string.amps_power, amps.progress + 6, ChargingPlanner.powerKw(amps.progress + 6, selectedPhases()))
                 consumptionValue.text = t(R.string.consumption_value, (consumption.progress + 10) / 10.0)
                 energyValue.text = t(R.string.energy_value_integer, energy.progress + 1)
+                periodsValue.text = (periods.progress + 1).toString()
                 render()
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) = Unit
             override fun onStopTrackingTouch(seekBar: SeekBar?) { saveCharging(currentSettings()); status.text = t(R.string.saved) }
         }
-        amps.setOnSeekBarChangeListener(listener); consumption.setOnSeekBarChangeListener(listener); energy.setOnSeekBarChangeListener(listener)
+        amps.setOnSeekBarChangeListener(listener); consumption.setOnSeekBarChangeListener(listener)
+        energy.setOnSeekBarChangeListener(listener); periods.setOnSeekBarChangeListener(listener)
         phases.setOnCheckedChangeListener { _, _ ->
             ampsValue.text = t(R.string.amps_power, amps.progress + 6, ChargingPlanner.powerKw(amps.progress + 6, selectedPhases()))
             saveCharging(currentSettings()); render(); status.text = t(R.string.saved)
@@ -509,7 +518,8 @@ class WidgetConfigActivity : Activity() {
                         action = "schedule", start = plan.start.toString(), end = plan.end.toString(),
                         amps = value.chargingAmps, phases = value.chargingPhases,
                         powerKw = plan.powerKw, energyKwh = plan.energyKwh,
-                        priceArea = value.area, estimated = plan.estimatedPriceSlots > 0
+                        priceArea = value.area, estimated = plan.estimatedPriceSlots > 0,
+                        periods = plan.periods
                     ))
                 }
             }

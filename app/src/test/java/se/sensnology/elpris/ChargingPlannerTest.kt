@@ -36,4 +36,22 @@ class ChargingPlannerTest {
         assertTrue(plan!!.estimatedPriceSlots > 0)
         assertTrue(plan.estimatedCost > 0)
     }
+
+    @Test fun splitsChargingIntoConfiguredMaximumNumberOfPeriods() {
+        val start = OffsetDateTime.parse("2026-09-12T18:00:00+02:00")
+        val prices = listOf(9.0, 1.0, 8.0, 0.5, 7.0).mapIndexed { index, price ->
+            PricePoint(start.plusMinutes(index * 15L), price)
+        }
+        val settings = WidgetSettings(
+            chargingPhases = 1, chargingAmps = 10, chargingKwh = 1,
+            maxChargingPeriods = 2, useDepartureTime = true,
+            departureHour = 20, departureMinute = 0
+        )
+
+        val plan = ChargingPlanner.calculate(PriceResult(prices, emptyList(), 0), settings, start)!!
+
+        assertEquals(2, plan.periods.size)
+        assertEquals(start.plusMinutes(15), plan.periods[0].start)
+        assertEquals(start.plusMinutes(45), plan.periods[1].start)
+    }
 }

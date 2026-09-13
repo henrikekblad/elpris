@@ -51,7 +51,9 @@
   <string name="updated">Widgeten uppdateras</string>
   <string name="saved">Sparat</string>
   <string name="saved_updated">Sparat och widgeten uppdateras</string>
-  <string name="planner_intro">Hitta den billigaste sammanhängande laddtiden under det närmaste dygnet.</string>
+  <string name="planner_intro">Hitta de billigaste laddtiderna under det närmaste dygnet. Laddningen kan delas upp i valt maximalt antal perioder.</string>
+  <string name="max_charging_periods">Maximalt antal laddperioder</string>
+  <string name="charging_period_count">%1$d perioder</string>
   <string name="misses_departure">Hinner inte före avresan</string>
   <string name="no_plan">Ingen laddtid kan beräknas</string>
   <string name="not_enough_prices">Det saknas tillräckligt med prisdata för att beräkna en laddtid.</string>

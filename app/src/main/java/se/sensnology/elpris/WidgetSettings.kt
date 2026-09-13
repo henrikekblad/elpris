@@ -14,6 +14,7 @@ data class WidgetSettings(
     val chargingAmps: Int = 10,
     val consumptionKwhPerMil: Double = 2.0,
     val chargingKwh: Int = 20,
+    val maxChargingPeriods: Int = 1,
     val showChargingPlan: Boolean = false,
     val useDepartureTime: Boolean = true,
     val departureHour: Int = 8,
@@ -50,6 +51,7 @@ data class WidgetSettings(
                 chargingAmps = p.getInt(key + "chargingAmps", 10),
                 consumptionKwhPerMil = p.getString(key + "consumptionKwhPerMil", "2.0")?.toDoubleOrNull() ?: 2.0,
                 chargingKwh = p.getInt(key + "chargingKwh", 20),
+                maxChargingPeriods = p.getInt(key + "maxChargingPeriods", 1).coerceIn(1, 8),
                 showChargingPlan = p.getBoolean(key + "showChargingPlan", false),
                 useDepartureTime = p.getBoolean(key + "useDepartureTime", true),
                 departureHour = p.getInt(key + "departureHour", 8),
@@ -72,6 +74,7 @@ data class WidgetSettings(
                 .putInt(key + "chargingAmps", value.chargingAmps)
                 .putString(key + "consumptionKwhPerMil", value.consumptionKwhPerMil.toString())
                 .putInt(key + "chargingKwh", value.chargingKwh)
+                .putInt(key + "maxChargingPeriods", value.maxChargingPeriods.coerceIn(1, 8))
                 .putBoolean(key + "showChargingPlan", value.showChargingPlan)
                 .putBoolean(key + "useDepartureTime", value.useDepartureTime)
                 .putInt(key + "departureHour", value.departureHour)
@@ -82,7 +85,7 @@ data class WidgetSettings(
         fun delete(context: Context, id: Int) {
             val editor = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
             listOf("area", "vat", "tax", "transfer", "taxOre", "transferOre", "intervalMinutes",
-                "chargingPhases", "chargingAmps", "consumptionKwhPerMil", "chargingKwh", "showChargingPlan")
+                "chargingPhases", "chargingAmps", "consumptionKwhPerMil", "chargingKwh", "maxChargingPeriods", "showChargingPlan")
                 .forEach { editor.remove("$id.$it") }
             listOf("useDepartureTime", "departureHour", "departureMinute")
                 .forEach { editor.remove("$id.$it") }

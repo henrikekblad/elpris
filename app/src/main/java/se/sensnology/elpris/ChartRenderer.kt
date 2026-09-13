@@ -87,6 +87,23 @@ object ChartRenderer {
             return left + minute / 1440f * (right - left)
         }
 
+        chargingPlan?.let { plan ->
+            paint.color = 0xFF4B9FEA.toInt()
+            paint.alpha = 38
+            plan.periods.forEach { period ->
+                var segmentStart = period.start
+                while (segmentStart.toLocalDate() < period.end.toLocalDate()) {
+                    canvas.drawRect(x(segmentStart), top, right, bottom, paint)
+                    segmentStart = segmentStart.toLocalDate().plusDays(1).atStartOfDay().atOffset(segmentStart.offset)
+                }
+                if (segmentStart < period.end) canvas.drawRect(
+                    if (segmentStart.hour == 0 && segmentStart.minute == 0) left else x(segmentStart),
+                    top, x(period.end), bottom, paint
+                )
+            }
+            paint.alpha = 255
+        }
+
         paint.strokeWidth = 1f
         for (i in 0..2) {
             val gy = top + i * (bottom - top) / 2f
@@ -124,7 +141,9 @@ object ChartRenderer {
                 locale
             ))
             val estimate = if (plan.estimatedPriceSlots > 0) "${AppLanguageSettings.text(context, R.string.estimated)} · " else ""
-            val chargingText = "$estimate${AppLanguageSettings.text(context, R.string.charge)} $day $start–$end · %.1f kWh".format(plan.energyKwh)
+            val timeText = if (plan.periods.size == 1) "$day $start–$end"
+                else AppLanguageSettings.text(context, R.string.charging_period_count, plan.periods.size)
+            val chargingText = "$estimate${AppLanguageSettings.text(context, R.string.charge)} $timeText · %.1f kWh".format(plan.energyKwh)
             val rangeText = if (AppLanguageSettings.language(context) in setOf("sv", "nb")) "%.1f mil".format(plan.distanceMil)
                 else "%.0f km".format(plan.distanceMil * 10)
             val chargingTextWithRange = "$chargingText · $rangeText"

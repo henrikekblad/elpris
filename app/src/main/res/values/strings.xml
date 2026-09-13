@@ -51,7 +51,9 @@
   <string name="updated">Widget is updating</string>
   <string name="saved">Saved</string>
   <string name="saved_updated">Saved; widget is updating</string>
-  <string name="planner_intro">Find the cheapest continuous charging period during the next 24 hours.</string>
+  <string name="planner_intro">Find the cheapest charging times during the next 24 hours. The charging can be divided into the selected maximum number of periods.</string>
+  <string name="max_charging_periods">Maximum charging periods</string>
+  <string name="charging_period_count">%1$d periods</string>
   <string name="misses_departure">Cannot finish before departure</string>
   <string name="no_plan">No charging period can be calculated</string>
   <string name="not_enough_prices">There is not enough price data to calculate a charging period.</string>
