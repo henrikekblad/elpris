@@ -106,6 +106,8 @@
   <string name="home_assistant_start">Start now</string>
   <string name="home_assistant_stop">Stop</string>
   <string name="home_assistant_schedule">Send charging schedule</string>
+  <string name="home_assistant_schedule_update">Update charging schedule</string>
+  <string name="home_assistant_schedule_synced">Charging schedule synced</string>
   <string name="home_assistant_cancel">Cancel schedule</string>
   <string name="home_assistant_no_plan">No charging schedule is currently available.</string>
 </resources>

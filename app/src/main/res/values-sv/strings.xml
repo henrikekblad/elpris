@@ -101,6 +101,8 @@
   <string name="home_assistant_start">Starta nu</string>
   <string name="home_assistant_stop">Stoppa</string>
   <string name="home_assistant_schedule">Skicka laddschema</string>
+  <string name="home_assistant_schedule_update">Uppdatera laddschema</string>
+  <string name="home_assistant_schedule_synced">Laddschema synkat</string>
   <string name="home_assistant_cancel">Avbryt laddschema</string>
   <string name="home_assistant_no_plan">Det finns inget laddschema att skicka just nu.</string>
 </resources>

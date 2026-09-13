@@ -101,6 +101,8 @@
   <string name="home_assistant_start">Start nu</string>
   <string name="home_assistant_stop">Stop</string>
   <string name="home_assistant_schedule">Send ladeplan</string>
+  <string name="home_assistant_schedule_update">Opdater ladeplan</string>
+  <string name="home_assistant_schedule_synced">Ladeplan synkroniseret</string>
   <string name="home_assistant_cancel">Annuller ladeplan</string>
   <string name="home_assistant_no_plan">Der er ingen ladeplan at sende lige nu.</string>
 </resources>

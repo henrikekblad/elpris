@@ -101,6 +101,8 @@
   <string name="home_assistant_start">Käynnistä nyt</string>
   <string name="home_assistant_stop">Pysäytä</string>
   <string name="home_assistant_schedule">Lähetä latausaikataulu</string>
+  <string name="home_assistant_schedule_update">Päivitä latausaikataulu</string>
+  <string name="home_assistant_schedule_synced">Latausaikataulu synkronoitu</string>
   <string name="home_assistant_cancel">Peruuta latausaikataulu</string>
   <string name="home_assistant_no_plan">Lähetettävää latausaikataulua ei ole juuri nyt.</string>
 </resources>

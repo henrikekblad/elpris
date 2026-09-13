@@ -21,7 +21,9 @@ data class HomeAssistantStatus(
     val chargingEnabled: Boolean,
     val scheduleActive: Boolean,
     val start: String?,
-    val end: String?
+    val end: String?,
+    val amps: Int?,
+    val periods: List<ChargingPeriod>
 )
 
 object HomeAssistantClient {
@@ -59,7 +61,16 @@ object HomeAssistantClient {
             chargingEnabled = response.optBoolean("charging_enabled"),
             scheduleActive = response.optBoolean("schedule_active"),
             start = response.optString("start").takeUnless { it.isBlank() || it == "null" },
-            end = response.optString("end").takeUnless { it.isBlank() || it == "null" }
+            end = response.optString("end").takeUnless { it.isBlank() || it == "null" },
+            amps = if (response.isNull("amps")) null else response.optInt("amps"),
+            periods = response.optJSONArray("periods")?.let { array ->
+                (0 until array.length()).map { index -> array.getJSONObject(index) }.map {
+                    ChargingPeriod(
+                        java.time.OffsetDateTime.parse(it.getString("start")),
+                        java.time.OffsetDateTime.parse(it.getString("end"))
+                    )
+                }
+            }.orEmpty()
         )
 
     private fun request(settings: HomeAssistantSettings, command: HomeAssistantCommand): JSONObject {

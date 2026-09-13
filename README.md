@@ -17,7 +17,7 @@ Elpris is a configurable Android home-screen widget that displays today's and to
 - Local currencies and country-specific VAT rates.
 - Optional editable electricity tax and grid fee.
 - Price table with colour-coded rows and highlighting of the current interval.
-- EV charging planner for single-phase or three-phase charging, including energy demand, consumption and departure time.
+- EV charging planner for single-phase or three-phase charging, including energy demand, consumption, departure time and up to eight optimized charging periods.
 - Optional charging recommendation at the bottom of the widget.
 - Flexible widget sizing for different screens and launchers.
 - Local cache for temporary network failures.
@@ -38,7 +38,7 @@ Elpris is a configurable Android home-screen widget that displays today's and to
 
 ## EV charging planner
 
-Choose single-phase or three-phase charging (6–16 A), vehicle consumption, energy to add and optionally a departure time. The app finds the cheapest continuous charging period and estimates its cost and resulting range.
+Choose single-phase or three-phase charging (6–16 A), vehicle consumption, energy to add, a maximum of one to eight charging periods and optionally a departure time. The app finds the cheapest combination of quarter-hours, estimates its cost and resulting range, and can highlight the periods in blue in the widget.
 
 If charging extends beyond the published prices, missing intervals are estimated from the latest published daily price profile and the result is clearly marked as estimated. Calculations use ideal power at 230 V single phase or 400 V three phase; actual charging losses and the vehicle's charging curve are not included.
 
@@ -62,9 +62,11 @@ VAT is applied last and follows the selected market. Suggested tax values are ed
 
 Elpris can send its calculated charging period, start, stop and cancel commands to the separate [Elpris charging control integration](https://github.com/henrikekblad/elpris-home-assistant). Home Assistant stores and executes the schedule, so it does not depend on the phone remaining online.
 
-Install the integration through HACS, select the charger controls during setup, then enter the external Home Assistant HTTPS address and private webhook ID under **Settings → Home Assistant** in Elpris. No Home Assistant account password or general access token is stored in the app.
+Install the integration through HACS and select the charger controls during setup. In Home Assistant, open the integration's **App connection** entity and copy its `webhook_id` attribute. Then enter the external Home Assistant HTTPS address and webhook ID under **Settings → Home Assistant** in Elpris and tap **Test connection**. No Home Assistant account password or general access token is stored in the app.
 
-The webhook ID is a secret. It is deliberately limited to the charger selected in the integration and accepts only schedule, cancel, start and stop operations.
+In the EV tab, **Start now** applies the currently selected amperage before enabling charging. The schedule button shows whether the calculated periods are synchronized with Home Assistant or need to be sent or updated.
+
+The webhook ID is a secret. It is deliberately limited to the charger selected in the integration and accepts only status, schedule, cancel, start and stop operations. Do not publish it or include it in screenshots.
 
 ## Build locally
 

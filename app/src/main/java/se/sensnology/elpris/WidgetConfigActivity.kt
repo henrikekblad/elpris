@@ -5,12 +5,14 @@ import android.app.TimePickerDialog
 import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.graphics.Typeface
+import android.content.res.ColorStateList
 import android.graphics.drawable.ClipDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.text.InputType
+import android.text.method.PasswordTransformationMethod
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -290,13 +292,14 @@ class WidgetConfigActivity : Activity() {
             departureMinute = departureMinute
         )
 
-        addHomeAssistantControls(homeAssistantControls, generation, ::currentSettings) { currentPlan }
+        val updateHomeAssistantSync = addHomeAssistantControls(homeAssistantControls, generation, ::currentSettings) { currentPlan }
 
         var prices: PriceResult? = null
         fun render() {
             settings = currentSettings()
             val plan = prices?.let { ChargingPlanner.calculate(it, settings) }
             currentPlan = plan
+            updateHomeAssistantSync(plan)
             if (plan == null) {
                 val durationMinutes = ChargingPlanner.durationMinutes(settings)
                 val localNow = OffsetDateTime.now()
@@ -402,6 +405,7 @@ class WidgetConfigActivity : Activity() {
             hint = t(R.string.home_assistant_webhook)
             setText(saved.webhookId)
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            transformationMethod = PasswordTransformationMethod.getInstance()
             isSingleLine = true
         }
         val status = TextView(this).apply {
@@ -453,19 +457,47 @@ class WidgetConfigActivity : Activity() {
         generation: Int,
         currentSettings: () -> WidgetSettings,
         currentPlan: () -> ChargingPlan?
-    ) {
+    ): (ChargingPlan?) -> Unit {
         val connection = HomeAssistantSettings.load(this)
-        if (!connection.configured) return
+        if (!connection.configured) return {}
         parent.addView(sectionTitle(t(R.string.home_assistant)))
         val status = TextView(this).apply {
             text = t(R.string.home_assistant_checking)
             textSize = 13f; setTextColor(muted); setPadding(0, 0, 0, dp(4))
         }
         parent.addView(status)
+        var remoteStatus: HomeAssistantStatus? = null
+        var scheduleButton: Button? = null
+        fun periodsMatch(local: ChargingPlan, remote: HomeAssistantStatus): Boolean {
+            if (!remote.scheduleActive || remote.amps != currentSettings().chargingAmps) return false
+            return local.periods.size == remote.periods.size && local.periods.zip(remote.periods).all { (a, b) ->
+                a.start.toInstant() == b.start.toInstant() && a.end.toInstant() == b.end.toInstant()
+            }
+        }
+        fun updateSync(plan: ChargingPlan?) {
+            val button = scheduleButton ?: return
+            val remote = remoteStatus
+            when {
+                plan != null && remote != null && periodsMatch(plan, remote) -> {
+                    button.text = t(R.string.home_assistant_schedule_synced)
+                    button.backgroundTintList = ColorStateList.valueOf(0xFF2E8B57.toInt())
+                }
+                remote?.scheduleActive == true -> {
+                    button.text = t(R.string.home_assistant_schedule_update)
+                    button.backgroundTintList = ColorStateList.valueOf(0xFFD47A19.toInt())
+                }
+                else -> {
+                    button.text = t(R.string.home_assistant_schedule)
+                    button.backgroundTintList = ColorStateList.valueOf(accent)
+                }
+            }
+            button.isEnabled = plan != null
+        }
         ioExecutor.execute {
             val result = runCatching { HomeAssistantClient.status(connection) }
             runOnUiThread {
                 if (isDestroyed || generation != viewGeneration) return@runOnUiThread
+                remoteStatus = result.getOrNull()
                 status.text = result.fold(
                     onSuccess = {
                         when {
@@ -477,18 +509,24 @@ class WidgetConfigActivity : Activity() {
                     onFailure = { t(R.string.home_assistant_error, it.message ?: "") }
                 )
                 status.setTextColor(if (result.isSuccess) muted else 0xFFD65C5C.toInt())
+                updateSync(currentPlan())
             }
         }
         fun send(command: HomeAssistantCommand) {
             status.text = t(R.string.home_assistant_sending)
             status.setTextColor(muted)
             ioExecutor.execute {
-                val error = runCatching { HomeAssistantClient.send(connection, command) }.exceptionOrNull()
+                val result = runCatching {
+                    HomeAssistantClient.send(connection, command)
+                    HomeAssistantClient.status(connection)
+                }
                 runOnUiThread {
                     if (isDestroyed || generation != viewGeneration) return@runOnUiThread
-                    status.text = if (error == null) t(R.string.home_assistant_sent)
-                        else t(R.string.home_assistant_error, error.message ?: "")
-                    status.setTextColor(if (error == null) accent else 0xFFD65C5C.toInt())
+                    remoteStatus = result.getOrNull()
+                    status.text = if (result.isSuccess) t(R.string.home_assistant_sent)
+                        else t(R.string.home_assistant_error, result.exceptionOrNull()?.message ?: "")
+                    status.setTextColor(if (result.isSuccess) accent else 0xFFD65C5C.toInt())
+                    updateSync(currentPlan())
                 }
             }
         }
@@ -505,7 +543,7 @@ class WidgetConfigActivity : Activity() {
             setOnClickListener { send(HomeAssistantCommand("stop")) }
         }, weight())
         parent.addView(actions)
-        parent.addView(Button(this).apply {
+        val createdScheduleButton = Button(this).apply {
             text = t(R.string.home_assistant_schedule); isAllCaps = false
             setOnClickListener {
                 val plan = currentPlan()
@@ -523,11 +561,15 @@ class WidgetConfigActivity : Activity() {
                     ))
                 }
             }
-        }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48)))
+        }
+        scheduleButton = createdScheduleButton
+        parent.addView(createdScheduleButton, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48)))
         parent.addView(Button(this).apply {
             text = t(R.string.home_assistant_cancel); isAllCaps = false
             setOnClickListener { send(HomeAssistantCommand("cancel")) }
         }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48)))
+        updateSync(currentPlan())
+        return ::updateSync
     }
 
     private fun sectionTitle(text: String) = TextView(this).apply {

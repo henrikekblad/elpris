@@ -17,7 +17,7 @@ En anpassningsbar Android-widget som visar spotpriser för idag och imorgon på 
 - Språkval för svenska, norska, danska, finska och engelska; valt språks land visas först bland elområdena.
 - Valfri moms, energiskatt och överföringsavgift.
 - Pristabell med idag och imorgon sida vid sida, färgkodning, markerad aktuell rad och automatisk scrollning till aktuell tid.
-- Elbilsplanering för en- eller trefasladdning som hittar den billigaste sammanhängande laddtiden utifrån laddström, önskad energi och bilens förbrukning.
+- Elbilsplanering för en- eller trefasladdning som optimerar upp till åtta laddperioder utifrån laddström, önskad energi och bilens förbrukning.
 - Valfri laddrekommendation direkt under grafen i widgeten.
 - Storleksanpassningsbar widget för olika launchers och skärmstorlekar.
 - Persistent lokal cache: senast hämtade priser finns kvar vid tillfälliga nätverksfel.
@@ -38,7 +38,7 @@ En anpassningsbar Android-widget som visar spotpriser för idag och imorgon på 
 
 ## Elbilsplanering
 
-På fliken **Elbil** väljer du en- eller trefasladdning (6–16 A), bilens ungefärliga förbrukning i kWh/mil och hur många kWh du vill ladda. Du kan ange en avresetid så att laddningen alltid hinner bli klar; nästa förekomst av det valda klockslaget används. Appen visar hur långt energin ungefär räcker, kostnad samt den billigaste sammanhängande laddperioden före avresan eller med start under de kommande 24 timmarna. Om laddningen sträcker sig förbi publicerade priser uppskattas de saknade kvartarna från det senast publicerade dygnets prisprofil och kostnaden märks tydligt som uppskattad.
+På fliken **Elbil** väljer du en- eller trefasladdning (6–16 A), bilens ungefärliga förbrukning i kWh/mil, hur många kWh du vill ladda och maximalt en till åtta laddperioder. Du kan ange en avresetid så att laddningen alltid hinner bli klar; nästa förekomst av det valda klockslaget används. Appen väljer den billigaste kombinationen av kvartar, visar räckvidd och kostnad och kan markera perioderna med svagt blå bakgrund i widgeten. Om laddningen sträcker sig förbi publicerade priser uppskattas de saknade kvartarna från det senast publicerade dygnets prisprofil och kostnaden märks tydligt som uppskattad.
 
 Beräkningen utgår från 230 V enfas eller 400 V trefas och ideal laddningseffekt. Verklig effekt, laddförlust och bilens laddkurva kan göra laddningen något långsammare. Tider och kostnader är därför ungefärliga.
 
@@ -46,9 +46,11 @@ Beräkningen utgår från 230 V enfas eller 400 V trefas och ideal laddningseffe
 
 Elpris kan skicka den beräknade laddperioden samt start-, stopp- och avbrytkommandon till den separata [Elpris charging control-integrationen](https://github.com/henrikekblad/elpris-home-assistant). Schemat sparas och utförs av Home Assistant och är därför inte beroende av att telefonen förblir ansluten.
 
-Installera integrationen genom HACS, välj laddarens styrentiteter under konfigurationen och ange sedan Home Assistants externt åtkomliga HTTPS-adress och privata webhook-ID under **Inställningar → Home Assistant** i Elpris. Appen lagrar varken lösenordet till ditt Home Assistant-konto eller någon generell åtkomsttoken.
+Installera integrationen genom HACS och välj laddarens styrentiteter. Öppna därefter integrationens entitet **Appanslutning** i Home Assistant och kopiera attributet `webhook_id`. Ange Home Assistants externt åtkomliga HTTPS-adress och detta webhook-ID under **Inställningar → Home Assistant** i Elpris och tryck **Testa anslutningen**. Appen lagrar varken lösenordet till ditt Home Assistant-konto eller någon generell åtkomsttoken.
 
-Webhook-ID:t är hemligt. Det är avsiktligt begränsat till laddaren som valts i integrationen och tar bara emot kommandon för schema, avbryt, start och stopp.
+Under Elbil ställer **Starta nu** först in det amperetal som är valt i appen och aktiverar sedan laddningen. Schemaknappen visar om appens beräknade perioder är synkroniserade med Home Assistant eller behöver skickas/uppdateras.
+
+Webhook-ID:t är en genererad hemlighet för Elpris-integrationen, inte en vanlig HA-token. Det är begränsat till laddaren som valts i integrationen och tar bara emot status-, schema-, avbryt-, start- och stoppkommandon. Publicera det inte och visa det inte i skärmbilder.
 
 <p align="center">
   <img src="assets/charge.jpg" alt="Elbilsplanering med laddström, förbrukning, energimängd, avresetid och rekommenderad laddperiod" width="360">
