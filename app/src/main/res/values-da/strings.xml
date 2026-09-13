@@ -80,7 +80,8 @@
   <string name="section_general">Generelt</string>
   <string name="section_electricity_price">Elpris</string>
   <string name="home_assistant">Home Assistant</string>
-  <string name="home_assistant_intro">Forbind Elpris-integrationen til Home Assistant med dens private webhook-id. Forbindelsen kan kun styre den lader, der er valgt i integrationen.</string>
+  <string name="home_assistant_intro">Forbind %1$s med dens private webhook-id. Forbindelsen kan kun styre den lader, der er valgt i integrationen.</string>
+  <string name="home_assistant_integration_link">Elpris-integrationen til Home Assistant</string>
   <string name="home_assistant_url">Home Assistant-adresse (HTTPS)</string>
   <string name="home_assistant_webhook">Nyt privat webhook-id (lad stå tomt for at beholde det gemte)</string>
   <string name="home_assistant_save">Gem forbindelse</string>

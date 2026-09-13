@@ -80,7 +80,8 @@
   <string name="section_general">Generelt</string>
   <string name="section_electricity_price">Strømpris</string>
   <string name="home_assistant">Home Assistant</string>
-  <string name="home_assistant_intro">Koble til Elpris-integrasjonen for Home Assistant med den private webhook-ID-en. Tilkoblingen kan bare styre laderen som er valgt i integrasjonen.</string>
+  <string name="home_assistant_intro">Koble til %1$s med den private webhook-ID-en. Tilkoblingen kan bare styre laderen som er valgt i integrasjonen.</string>
+  <string name="home_assistant_integration_link">Elpris-integrasjonen for Home Assistant</string>
   <string name="home_assistant_url">Home Assistant-adresse (HTTPS)</string>
   <string name="home_assistant_webhook">Ny privat webhook-ID (la stå tomt for å beholde den lagrede)</string>
   <string name="home_assistant_save">Lagre tilkobling</string>

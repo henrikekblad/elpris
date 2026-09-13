@@ -85,7 +85,8 @@
   <string name="section_general">General</string>
   <string name="section_electricity_price">Electricity price</string>
   <string name="home_assistant">Home Assistant</string>
-  <string name="home_assistant_intro">Connect the Elpris integration for Home Assistant using its private webhook ID. The connection can only control the charger configured in the integration.</string>
+  <string name="home_assistant_intro">Connect the %1$s using its private webhook ID. The connection can only control the charger configured in the integration.</string>
+  <string name="home_assistant_integration_link">Elpris integration for Home Assistant</string>
   <string name="home_assistant_url">Home Assistant URL (HTTPS)</string>
   <string name="home_assistant_webhook">New private webhook ID (leave blank to keep saved ID)</string>
   <string name="home_assistant_save">Save connection</string>

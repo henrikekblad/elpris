@@ -6,13 +6,19 @@ import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.graphics.Typeface
 import android.content.res.ColorStateList
+import android.net.Uri
 import android.graphics.drawable.ClipDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.text.InputType
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.TextPaint
 import android.text.method.PasswordTransformationMethod
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -390,9 +396,24 @@ class WidgetConfigActivity : Activity() {
 
     private fun addHomeAssistantSettings() {
         content.addView(sectionTitle(t(R.string.home_assistant)))
+        val integrationLink = t(R.string.home_assistant_integration_link)
+        val introduction = SpannableString(t(R.string.home_assistant_intro, integrationLink)).apply {
+            val start = toString().indexOf(integrationLink)
+            if (start >= 0) setSpan(object : ClickableSpan() {
+                override fun onClick(widget: View) {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(HOME_ASSISTANT_REPOSITORY)))
+                }
+                override fun updateDrawState(ds: TextPaint) {
+                    ds.color = accent
+                    ds.isUnderlineText = true
+                }
+            }, start, start + integrationLink.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
         content.addView(TextView(this).apply {
-            text = t(R.string.home_assistant_intro)
+            text = introduction
             textSize = 13f; setTextColor(muted); setPadding(0, 0, 0, dp(6))
+            movementMethod = LinkMovementMethod.getInstance()
+            highlightColor = 0x00000000
         })
         val saved = HomeAssistantSettings.load(this)
         val url = EditText(this).apply {
@@ -728,6 +749,7 @@ class WidgetConfigActivity : Activity() {
     }
 
     companion object {
+        private const val HOME_ASSISTANT_REPOSITORY = "https://github.com/henrikekblad/elpris-home-assistant"
         const val EXTRA_EXISTING_WIDGET = "existing_widget"
         const val EXTRA_HOME_ASSISTANT_PAIRING = "home_assistant_pairing"
     }

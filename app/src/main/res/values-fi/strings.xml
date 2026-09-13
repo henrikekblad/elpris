@@ -80,7 +80,8 @@
   <string name="section_general">Yleiset</string>
   <string name="section_electricity_price">Sähkön hinta</string>
   <string name="home_assistant">Home Assistant</string>
-  <string name="home_assistant_intro">Yhdistä Home Assistantin Elpris-integraatio sen yksityisellä webhook-tunnuksella. Yhteys voi ohjata vain integraatiossa valittua laturia.</string>
+  <string name="home_assistant_intro">Yhdistä %1$s sen yksityisellä webhook-tunnuksella. Yhteys voi ohjata vain integraatiossa valittua laturia.</string>
+  <string name="home_assistant_integration_link">Home Assistantin Elpris-integraatio</string>
   <string name="home_assistant_url">Home Assistant -osoite (HTTPS)</string>
   <string name="home_assistant_webhook">Uusi yksityinen webhook-tunnus (jätä tyhjäksi säilyttääksesi tallennetun)</string>
   <string name="home_assistant_save">Tallenna yhteys</string>
