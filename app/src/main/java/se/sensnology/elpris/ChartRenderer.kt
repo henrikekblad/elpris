@@ -116,9 +116,12 @@ object ChartRenderer {
         }
         paint.textAlign = Paint.Align.LEFT
 
-        // Draw tomorrow first as a neutral comparison behind today's prices.
-        drawTomorrow(canvas, paint, tomorrow, ::x, ::y, scale)
-        drawToday(canvas, paint, today, ::x, ::y, scale, now)
+        // Hourly averages represent a complete interval, while quarter-hour prices
+        // remain discrete points. Draw tomorrow first as a neutral comparison.
+        val hourly = settings.intervalMinutes == 60
+        val hourWidth = (right - left) / 24f
+        drawTomorrow(canvas, paint, tomorrow, ::x, ::y, scale, hourly, hourWidth)
+        drawToday(canvas, paint, today, ::x, ::y, scale, now, hourly, hourWidth)
 
         paint.textSize = axisText
         paint.color = MUTED
@@ -155,15 +158,30 @@ object ChartRenderer {
     }
 
     private fun drawTomorrow(canvas: Canvas, paint: Paint, values: List<Pair<OffsetDateTime, Double>>,
-                             x: (OffsetDateTime) -> Float, y: (Double) -> Float, scale: Float) {
+                             x: (OffsetDateTime) -> Float, y: (Double) -> Float, scale: Float,
+                             hourly: Boolean, hourWidth: Float) {
         paint.style = Paint.Style.FILL; paint.color = TOMORROW; paint.alpha = 190
         val radius = max(3.2f * scale, canvas.height * .0052f)
-        values.forEach { canvas.drawCircle(x(it.first), y(it.second), radius, paint) }
+        if (hourly) {
+            paint.style = Paint.Style.STROKE
+            paint.strokeCap = Paint.Cap.ROUND
+            paint.strokeWidth = radius * 1.35f
+            val halfLine = hourWidth * .39f
+            values.forEach {
+                val center = x(it.first.plusMinutes(30))
+                canvas.drawLine(center - halfLine, y(it.second), center + halfLine, y(it.second), paint)
+            }
+            paint.strokeCap = Paint.Cap.BUTT
+        } else {
+            values.forEach { canvas.drawCircle(x(it.first), y(it.second), radius, paint) }
+        }
+        paint.style = Paint.Style.FILL
         paint.alpha = 255
     }
 
     private fun drawToday(canvas: Canvas, paint: Paint, values: List<Pair<OffsetDateTime, Double>>,
-                          x: (OffsetDateTime) -> Float, y: (Double) -> Float, scale: Float, now: OffsetDateTime) {
+                          x: (OffsetDateTime) -> Float, y: (Double) -> Float, scale: Float, now: OffsetDateTime,
+                          hourly: Boolean, hourWidth: Float) {
         if (values.isEmpty()) return
         paint.style = Paint.Style.FILL
         val average = values.map { it.second }.average()
@@ -172,10 +190,28 @@ object ChartRenderer {
         values.forEachIndexed { index, item ->
             paint.color = if (item.second <= average) CHEAP else EXPENSIVE
             paint.alpha = if (index <= currentIndex) 245 else 205
-            canvas.drawCircle(x(item.first), y(item.second), if (index == currentIndex) radius * 2.35f else radius, paint)
+            val pointX = if (hourly) x(item.first.plusMinutes(30)) else x(item.first)
+            if (hourly) {
+                paint.style = Paint.Style.STROKE
+                paint.strokeCap = Paint.Cap.ROUND
+                paint.strokeWidth = radius * 1.35f
+                val halfLine = hourWidth * .39f
+                canvas.drawLine(pointX - halfLine, y(item.second), pointX + halfLine, y(item.second), paint)
+                paint.strokeCap = Paint.Cap.BUTT
+                paint.style = Paint.Style.FILL
+            } else {
+                canvas.drawCircle(pointX, y(item.second), if (index == currentIndex) radius * 2.35f else radius, paint)
+            }
             if (index == currentIndex) {
                 paint.style = Paint.Style.STROKE; paint.strokeWidth = max(2f, radius * .35f); paint.color = Color.WHITE; paint.alpha = 230
-                canvas.drawCircle(x(item.first), y(item.second), radius * 2.35f, paint); paint.style = Paint.Style.FILL
+                paint.style = Paint.Style.FILL
+                paint.color = if (item.second <= average) CHEAP else EXPENSIVE
+                canvas.drawCircle(pointX, y(item.second), radius * 2.35f, paint)
+                paint.style = Paint.Style.STROKE
+                paint.strokeWidth = max(2f, radius * .35f)
+                paint.color = Color.WHITE
+                canvas.drawCircle(pointX, y(item.second), radius * 2.35f, paint)
+                paint.style = Paint.Style.FILL
             }
         }
         paint.alpha = 255
