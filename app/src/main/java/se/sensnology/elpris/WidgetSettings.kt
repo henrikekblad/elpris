@@ -32,6 +32,10 @@ data class WidgetSettings(
         const val DEFAULT_TAX_MINOR_UNIT = 36.0
         const val DEFAULT_GRID_FEE_MINOR_UNIT = 30.0
         private const val PREFS = "widget_settings"
+
+        fun isConfigured(context: Context, id: Int): Boolean =
+            context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).contains("$id.area")
+
         fun load(context: Context, id: Int): WidgetSettings {
             val p = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             val key = "$id."

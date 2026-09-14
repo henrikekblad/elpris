@@ -106,4 +106,9 @@
   <string name="home_assistant_schedule_synced">Laddschema synkat</string>
   <string name="home_assistant_cancel">Avbryt laddschema</string>
   <string name="home_assistant_no_plan">Det finns inget laddschema att skicka just nu.</string>
+  <string name="version_label">Version %1$s</string>
+  <string name="report_issue">Rapportera ett fel</string>
+  <string name="forget_widget">Glöm</string>
+  <string name="forget_widget_title">Glöm den här widgeten?</string>
+  <string name="forget_widget_message">SpotNav tar bort instansen från väljaren. Android kan behålla widget-ID:t tills launchern städar bort det.</string>
 </resources>

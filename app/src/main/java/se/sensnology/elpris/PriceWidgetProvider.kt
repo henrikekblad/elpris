@@ -57,6 +57,11 @@ class PriceWidgetProvider : AppWidgetProvider() {
         private val executor = Executors.newSingleThreadExecutor()
 
         fun update(context: Context, manager: AppWidgetManager, id: Int, pending: PendingResult? = null, forceRefresh: Boolean = false) {
+            if (!WidgetSettings.isConfigured(context, id)) {
+                Log.i("SpotNavWidget", "Skipping unconfigured widget=$id")
+                pending?.finish()
+                return
+            }
             executor.execute {
                 try {
                     val settings = WidgetSettings.load(context, id)

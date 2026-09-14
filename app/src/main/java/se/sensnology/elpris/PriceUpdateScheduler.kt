@@ -20,6 +20,7 @@ object PriceUpdateScheduler {
     fun scheduleNext(context: Context, tomorrowAvailable: Boolean) {
         val manager = AppWidgetManager.getInstance(context)
         val ids = manager.getAppWidgetIds(ComponentName(context, PriceWidgetProvider::class.java))
+            .filter { WidgetSettings.isConfigured(context, it) }
         val markets = ids.map { WidgetSettings.load(context, it).area }.distinct()
             .map(PriceMarkets::find).ifEmpty { listOf(PriceMarkets.find(PriceMarkets.defaultArea(AppLanguageSettings.region(context)))) }
         val next = markets.map { market ->
@@ -41,6 +42,7 @@ object PriceUpdateScheduler {
     fun scheduleForActiveWidgets(context: Context) {
         val manager = AppWidgetManager.getInstance(context)
         val ids = manager.getAppWidgetIds(ComponentName(context, PriceWidgetProvider::class.java))
+            .filter { WidgetSettings.isConfigured(context, it) }
         val areas = ids.map { WidgetSettings.load(context, it).area }.distinct()
         scheduleNext(context, areas.isNotEmpty() && areas.all { PriceRepository.hasCachedTomorrow(context, it) })
     }

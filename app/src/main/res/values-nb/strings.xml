@@ -106,4 +106,9 @@
   <string name="home_assistant_schedule_synced">Ladeplan synkronisert</string>
   <string name="home_assistant_cancel">Avbryt ladeplan</string>
   <string name="home_assistant_no_plan">Det finnes ingen ladeplan å sende akkurat nå.</string>
+  <string name="version_label">Versjon %1$s</string>
+  <string name="report_issue">Rapporter en feil</string>
+  <string name="forget_widget">Glem</string>
+  <string name="forget_widget_title">Glem denne widgeten?</string>
+  <string name="forget_widget_message">SpotNav fjerner instansen fra velgeren. Android kan beholde widget-ID-en til launcheren rydder den opp.</string>
 </resources>

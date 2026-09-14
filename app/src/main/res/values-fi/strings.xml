@@ -106,4 +106,9 @@
   <string name="home_assistant_schedule_synced">Latausaikataulu synkronoitu</string>
   <string name="home_assistant_cancel">Peruuta latausaikataulu</string>
   <string name="home_assistant_no_plan">Lähetettävää latausaikataulua ei ole juuri nyt.</string>
+  <string name="version_label">Versio %1$s</string>
+  <string name="report_issue">Ilmoita ongelmasta</string>
+  <string name="forget_widget">Unohda</string>
+  <string name="forget_widget_title">Unohdetaanko tämä widget?</string>
+  <string name="forget_widget_message">SpotNav poistaa tämän ilmentymän valitsimesta. Android voi säilyttää widget-tunnuksen, kunnes käynnistysohjelma siivoaa sen.</string>
 </resources>

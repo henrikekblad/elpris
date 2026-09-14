@@ -111,4 +111,9 @@
   <string name="home_assistant_schedule_synced">Charging schedule synced</string>
   <string name="home_assistant_cancel">Cancel schedule</string>
   <string name="home_assistant_no_plan">No charging schedule is currently available.</string>
+  <string name="version_label">Version %1$s</string>
+  <string name="report_issue">Report an issue</string>
+  <string name="forget_widget">Forget</string>
+  <string name="forget_widget_title">Forget this widget?</string>
+  <string name="forget_widget_message">SpotNav will remove this instance from the chooser. Android may keep the widget ID until the launcher cleans it up.</string>
 </resources>

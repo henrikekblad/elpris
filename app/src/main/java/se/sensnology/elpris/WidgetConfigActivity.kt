@@ -52,7 +52,6 @@ class WidgetConfigActivity : Activity() {
         if (!editing) setResult(RESULT_CANCELED)
         widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID) { finish(); return }
-        if (widgetId > 0) LauncherActivity.rememberWidget(this, widgetId)
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(20), dp(8), dp(20), dp(20))
@@ -227,6 +226,19 @@ class WidgetConfigActivity : Activity() {
             }
         }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(54)).apply { topMargin = dp(20) })
         addHomeAssistantSettings()
+        addAppFooter()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (::content.isInitialized && widgetId < 0) {
+            val manager = AppWidgetManager.getInstance(this)
+            val component = android.content.ComponentName(this, PriceWidgetProvider::class.java)
+            if (manager.getAppWidgetIds(component).any { WidgetSettings.isConfigured(this, it) }) {
+                startActivity(Intent(this, LauncherActivity::class.java))
+                finish()
+            }
+        }
     }
 
     private fun showCharging() {
@@ -491,6 +503,31 @@ class WidgetConfigActivity : Activity() {
             }
         }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(48)))
         content.addView(status)
+    }
+
+    private fun addAppFooter() {
+        val issueText = t(R.string.report_issue)
+        val footer = SpannableString("${t(R.string.version_label, BuildConfig.VERSION_NAME)} · $issueText").apply {
+            val start = toString().indexOf(issueText)
+            setSpan(object : ClickableSpan() {
+                override fun onClick(widget: View) {
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(SPOTNAV_ISSUES)))
+                }
+                override fun updateDrawState(ds: TextPaint) {
+                    ds.color = accent
+                    ds.isUnderlineText = true
+                }
+            }, start, start + issueText.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+        content.addView(TextView(this).apply {
+            text = footer
+            textSize = 12f
+            setTextColor(muted)
+            gravity = Gravity.CENTER
+            setPadding(0, dp(28), 0, dp(12))
+            movementMethod = LinkMovementMethod.getInstance()
+            highlightColor = 0x00000000
+        })
     }
 
     private fun addHomeAssistantControls(
@@ -771,6 +808,7 @@ class WidgetConfigActivity : Activity() {
 
     companion object {
         private const val HOME_ASSISTANT_REPOSITORY = "https://github.com/henrikekblad/spotnav-home-assistant"
+        private const val SPOTNAV_ISSUES = "https://github.com/henrikekblad/spotnav/issues"
         const val EXTRA_EXISTING_WIDGET = "existing_widget"
         const val EXTRA_HOME_ASSISTANT_PAIRING = "home_assistant_pairing"
     }

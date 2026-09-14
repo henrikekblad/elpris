@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="assets/spotnav-icon.svg" alt="SpotNav logo" width="120">
+  <img src="assets/spotnav-social-preview.png" alt="SpotNav — Nordic spot prices and smart EV charging">
 </p>
-
-# SpotNav
 
 [Svensk dokumentation](README.sv.md)
 
