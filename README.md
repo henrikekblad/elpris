@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/spotnav-icon.svg" alt="SpotNav logo" width="120">
+</p>
+
 # SpotNav
 
 [Svensk dokumentation](README.sv.md)

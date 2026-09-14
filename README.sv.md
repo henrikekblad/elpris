@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/spotnav-icon.svg" alt="SpotNav-logga" width="120">
+</p>
+
 # SpotNav
 
 [English documentation](README.md)

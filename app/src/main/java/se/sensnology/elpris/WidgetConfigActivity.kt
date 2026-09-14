@@ -37,7 +37,7 @@ class WidgetConfigActivity : Activity() {
     private var accent = 0xFF1769AA.toInt()
     private var appBackground = 0xFFF6F7FB.toInt()
     private var cardBackground = 0xFFE7EEF6.toInt()
-    private val tabs = mutableListOf<Pair<TextView, View>>()
+    private val tabs = mutableListOf<ImageView>()
     private val ioExecutor = Executors.newSingleThreadExecutor()
     private var viewGeneration = 0
 
@@ -53,28 +53,41 @@ class WidgetConfigActivity : Activity() {
         widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
         if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID) { finish(); return }
         if (widgetId > 0) LauncherActivity.rememberWidget(this, widgetId)
-        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(20), dp(10), dp(20), dp(20)); setBackgroundColor(appBackground) }
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(20), dp(8), dp(20), dp(20))
+            setBackgroundColor(appBackground)
+            setOnApplyWindowInsetsListener { _, insets ->
+                setPadding(dp(20), insets.systemWindowInsetTop + dp(8), dp(20), dp(20))
+                insets
+            }
+        }
         root.addView(LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER; setPadding(0, dp(12), 0, dp(10))
-            translationY = dp(12).toFloat()
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
             addView(ImageView(this@WidgetConfigActivity).apply {
-                setImageResource(R.drawable.app_icon); contentDescription = getString(R.string.app_name)
-            }, LinearLayout.LayoutParams(dp(38), dp(38)).apply { marginEnd = dp(10) })
+                setImageResource(R.drawable.ic_spotnav_mark)
+                imageTintList = ColorStateList.valueOf(dark)
+                contentDescription = getString(R.string.app_name)
+            }, LinearLayout.LayoutParams(dp(28), dp(36)).apply { marginEnd = dp(7) })
             addView(TextView(this@WidgetConfigActivity).apply {
-                text = t(R.string.app_title); textSize = 27f; setTextColor(dark); typeface = Typeface.DEFAULT_BOLD
+                text = t(R.string.app_title)
+                textSize = 21f
+                setTextColor(dark)
+                typeface = Typeface.DEFAULT_BOLD
+                gravity = Gravity.CENTER_VERTICAL
             })
-        }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
-        val tabBar = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(0, dp(12), 0, dp(8)) }
-        tabBar.addView(tab(t(R.string.settings)) { showSettings(editing); selectTab(0) }, weight())
-        tabBar.addView(tab(t(R.string.table)) { showTable(); selectTab(1) }, weight())
-        tabBar.addView(tab(t(R.string.ev)) { showCharging(); selectTab(2) }, weight())
-        root.addView(tabBar)
+            addView(Space(this@WidgetConfigActivity), LinearLayout.LayoutParams(0, 1, 1f))
+            addView(tab(R.drawable.ic_ev, t(R.string.ev)) { showCharging(); selectTab(0) })
+            addView(tab(R.drawable.ic_price_table, t(R.string.table)) { showTable(); selectTab(1) })
+            addView(tab(R.drawable.ic_settings, t(R.string.settings)) { showSettings(editing); selectTab(2) })
+        }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(52)))
         content = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         scrollView = ScrollView(this).apply { addView(content) }
         root.addView(scrollView, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
         setContentView(root)
         showSettings(editing)
-        selectTab(0)
+        selectTab(2)
         if (intent.hasExtra(EXTRA_HOME_ASSISTANT_PAIRING)) {
             val message = if (intent.getBooleanExtra(EXTRA_HOME_ASSISTANT_PAIRING, false))
                 t(R.string.home_assistant_paired) else t(R.string.home_assistant_pairing_invalid)
@@ -718,20 +731,24 @@ class WidgetConfigActivity : Activity() {
             setStroke(dp(2), if (AppThemeSettings.isDark(this@WidgetConfigActivity)) 0xFFFFFFFF.toInt() else 0xFF000000.toInt())
         }
     }
-    private fun tab(name: String, action: () -> Unit) = LinearLayout(this).apply {
-        orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER
-        val label = TextView(this@WidgetConfigActivity).apply {
-            text = name; textSize = 15f; gravity = Gravity.CENTER; setPadding(dp(4), dp(10), dp(4), dp(9)); setOnClickListener { action() }
+    private fun tab(iconResource: Int, description: String, action: () -> Unit) = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL
+        gravity = Gravity.CENTER
+        minimumWidth = dp(50)
+        contentDescription = description
+        isClickable = true
+        isFocusable = true
+        setOnClickListener { action() }
+        val icon = ImageView(this@WidgetConfigActivity).apply {
+            setImageResource(iconResource)
+            imageTintList = ColorStateList.valueOf(muted)
         }
-        val indicator = View(this@WidgetConfigActivity).apply { setBackgroundColor(accent); setOnClickListener { action() } }
-        addView(label, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
-        addView(indicator, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(3)))
-        tabs.add(label to indicator)
+        addView(icon, LinearLayout.LayoutParams(dp(25), dp(25)))
+        tabs.add(icon)
     }
-    private fun selectTab(selected: Int) = tabs.forEachIndexed { index, (label, indicator) ->
-        label.setTextColor(if (index == selected) accent else muted)
-        label.typeface = if (index == selected) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
-        indicator.visibility = if (index == selected) View.VISIBLE else View.INVISIBLE
+    private fun selectTab(selected: Int) = tabs.forEachIndexed { index, icon ->
+        val inactive = if (AppThemeSettings.isDark(this)) 0xFF626B76.toInt() else 0xFFA3AAB3.toInt()
+        icon.imageTintList = ColorStateList.valueOf(if (index == selected) accent else inactive)
     }
     private fun label(value: String) = TextView(this).apply { text = value; textSize = 14f; setTextColor(muted); setPadding(0, dp(16), 0, dp(4)) }
     private fun checkbox(value: String, checked: Boolean) = CheckBox(this).apply { text = value; isChecked = checked; textSize = 16f }
