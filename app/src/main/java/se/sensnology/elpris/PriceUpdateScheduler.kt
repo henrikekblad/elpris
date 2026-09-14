@@ -35,7 +35,7 @@ object PriceUpdateScheduler {
             5 * 60 * 1000L,
             pendingIntent(context)
         )
-        Log.i("ElprisScheduler", "Next publication check ${next.toLocalDateTime()} available=$tomorrowAvailable")
+        Log.i("SpotNavScheduler", "Next publication check ${next.toLocalDateTime()} available=$tomorrowAvailable")
     }
 
     fun scheduleForActiveWidgets(context: Context) {

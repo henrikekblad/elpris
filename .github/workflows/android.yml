@@ -25,7 +25,7 @@ jobs:
       - run: ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with:
-          name: elpris-debug
+          name: spotnav-debug
           path: app/build/outputs/apk/debug/app-debug.apk
 
   release:
@@ -53,10 +53,10 @@ jobs:
         run: printf '%s' "$ANDROID_KEYSTORE" | base64 --decode > "$SIGNING_STORE_PATH"
       - run: ./gradlew assembleRelease
       - name: Name release APK
-        run: mv app/build/outputs/apk/release/app-release.apk "app/build/outputs/apk/release/elpris-${GITHUB_REF_NAME#v}.apk"
+        run: mv app/build/outputs/apk/release/app-release.apk "app/build/outputs/apk/release/spotnav-${GITHUB_REF_NAME#v}.apk"
       - uses: actions/upload-artifact@v4
         with:
-          name: elpris-release
-          path: app/build/outputs/apk/release/elpris-*.apk
+          name: spotnav-release
+          path: app/build/outputs/apk/release/spotnav-*.apk
       - name: Publish GitHub release
-        run: gh release create "$GITHUB_REF_NAME" "app/build/outputs/apk/release/elpris-${GITHUB_REF_NAME#v}.apk" --generate-notes --verify-tag
+        run: gh release create "$GITHUB_REF_NAME" "app/build/outputs/apk/release/spotnav-${GITHUB_REF_NAME#v}.apk" --generate-notes --verify-tag

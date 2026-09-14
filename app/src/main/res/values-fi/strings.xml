@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <string name="app_name">Sähkön hinta</string>
+  <string name="app_name">SpotNav</string>
   <string name="widget_description">Tämän ja huomisen sähköhinnat</string>
-  <string name="app_title">Sähkön hinta</string>
+  <string name="app_title">SpotNav</string>
   <string name="settings">Asetukset</string>
   <string name="table">Hintataulukko</string>
   <string name="ev">Sähköauto</string>
@@ -81,7 +81,7 @@
   <string name="section_electricity_price">Sähkön hinta</string>
   <string name="home_assistant">Home Assistant</string>
   <string name="home_assistant_intro">Yhdistä %1$s sen yksityisellä webhook-tunnuksella. Yhteys voi ohjata vain integraatiossa valittua laturia.</string>
-  <string name="home_assistant_integration_link">Home Assistantin Elpris-integraatio</string>
+  <string name="home_assistant_integration_link">Home Assistantin SpotNav-integraatio</string>
   <string name="home_assistant_url">Home Assistant -osoite</string>
   <string name="home_assistant_webhook">Uusi yksityinen webhook-tunnus (jätä tyhjäksi säilyttääksesi tallennetun)</string>
   <string name="home_assistant_save">Tallenna yhteys</string>

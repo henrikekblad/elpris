@@ -58,7 +58,7 @@ class WidgetConfigActivity : Activity() {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER; setPadding(0, dp(12), 0, dp(10))
             translationY = dp(12).toFloat()
             addView(ImageView(this@WidgetConfigActivity).apply {
-                setImageResource(R.drawable.app_icon); contentDescription = "Elpris"
+                setImageResource(R.drawable.app_icon); contentDescription = getString(R.string.app_name)
             }, LinearLayout.LayoutParams(dp(38), dp(38)).apply { marginEnd = dp(10) })
             addView(TextView(this@WidgetConfigActivity).apply {
                 text = t(R.string.app_title); textSize = 27f; setTextColor(dark); typeface = Typeface.DEFAULT_BOLD
@@ -749,7 +749,7 @@ class WidgetConfigActivity : Activity() {
     }
 
     companion object {
-        private const val HOME_ASSISTANT_REPOSITORY = "https://github.com/henrikekblad/elpris-home-assistant"
+        private const val HOME_ASSISTANT_REPOSITORY = "https://github.com/henrikekblad/spotnav-home-assistant"
         const val EXTRA_EXISTING_WIDGET = "existing_widget"
         const val EXTRA_HOME_ASSISTANT_PAIRING = "home_assistant_pairing"
     }

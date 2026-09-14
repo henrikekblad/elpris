@@ -14,7 +14,7 @@ data class PricePoint(val start: OffsetDateTime, val spotPricePerKwh: Double)
 data class PriceResult(val today: List<PricePoint>, val tomorrow: List<PricePoint>, val fetchedAt: Long)
 
 object PriceRepository {
-    private const val TAG = "ElprisRepository"
+    private const val TAG = "SpotNavRepository"
     private const val CACHE_PREFS = "price_cache"
     private val cache = ConcurrentHashMap<String, PriceResult>()
     private const val MEMORY_CACHE_MS = 10 * 60 * 1000L
@@ -58,7 +58,7 @@ object PriceRepository {
             connection.connectTimeout = 8_000
             connection.readTimeout = 8_000
             connection.setRequestProperty("Accept", "application/json")
-            connection.setRequestProperty("User-Agent", "Sensnology-Elpris/${BuildConfig.VERSION_NAME}")
+            connection.setRequestProperty("User-Agent", "Sensnology-SpotNav/${BuildConfig.VERSION_NAME}")
             val status = connection.responseCode
             Log.i(TAG, "GET $address -> HTTP $status")
             if (status == HttpURLConnection.HTTP_NOT_FOUND) return emptyList()

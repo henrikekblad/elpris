@@ -60,7 +60,7 @@ class PriceWidgetProvider : AppWidgetProvider() {
             executor.execute {
                 try {
                     val settings = WidgetSettings.load(context, id)
-                    Log.i("ElprisWidget", "Update start widget=$id area=${settings.area}")
+                    Log.i("SpotNavWidget", "Update start widget=$id area=${settings.area}")
                     val data = PriceRepository.load(context, settings.area, forceRefresh)
                     val options = manager.getAppWidgetOptions(id)
                     val density = context.resources.displayMetrics.density
@@ -77,7 +77,7 @@ class PriceWidgetProvider : AppWidgetProvider() {
                     views.setOnClickPendingIntent(R.id.widget_root, openIntent)
                     manager.updateAppWidget(id, views)
                     PriceUpdateScheduler.scheduleForActiveWidgets(context)
-                    Log.i("ElprisWidget", "Update complete widget=$id today=${data.today.size} tomorrow=${data.tomorrow.size}")
+                    Log.i("SpotNavWidget", "Update complete widget=$id today=${data.today.size} tomorrow=${data.tomorrow.size}")
                 } finally { pending?.finish() }
             }
         }

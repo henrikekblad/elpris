@@ -81,7 +81,7 @@ class LauncherActivity : Activity() {
 
     private fun handleHomeAssistantPairing(intent: Intent): Boolean? {
         val uri = intent.data ?: return null
-        if (uri.scheme != "elpris" || uri.host != "home-assistant") return null
+        if (uri.scheme !in setOf("spotnav", "elpris") || uri.host != "home-assistant") return null
         val url = uri.getQueryParameter("url").orEmpty().trim()
         val webhook = uri.getQueryParameter("webhook").orEmpty().trim()
         val valid = HomeAssistantSettings.isAllowedBaseUrl(url) && webhook.isNotBlank()

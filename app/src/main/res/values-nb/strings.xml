@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <string name="app_name">Strømpris</string>
+  <string name="app_name">SpotNav</string>
   <string name="widget_description">Strømpriser i dag og i morgen</string>
-  <string name="app_title">Strømpris</string>
+  <string name="app_title">SpotNav</string>
   <string name="settings">Innstillinger</string>
   <string name="table">Pristabell</string>
   <string name="ev">Elbil</string>
@@ -81,7 +81,7 @@
   <string name="section_electricity_price">Strømpris</string>
   <string name="home_assistant">Home Assistant</string>
   <string name="home_assistant_intro">Koble til %1$s med den private webhook-ID-en. Tilkoblingen kan bare styre laderen som er valgt i integrasjonen.</string>
-  <string name="home_assistant_integration_link">Elpris-integrasjonen for Home Assistant</string>
+  <string name="home_assistant_integration_link">SpotNav-integrasjonen for Home Assistant</string>
   <string name="home_assistant_url">Home Assistant-adresse</string>
   <string name="home_assistant_webhook">Ny privat webhook-ID (la stå tomt for å beholde den lagrede)</string>
   <string name="home_assistant_save">Lagre tilkobling</string>

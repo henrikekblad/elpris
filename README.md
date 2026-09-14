@@ -1,11 +1,11 @@
-# Elpris
+# SpotNav
 
 [Svensk dokumentation](README.sv.md)
 
-Elpris is a configurable Android home-screen widget that displays today's and tomorrow's electricity spot prices on the same 24-hour chart. It supports Sweden, Norway, Denmark and Finland and is available in Swedish, Norwegian, Danish, Finnish and English.
+SpotNav is a configurable Android home-screen widget and smart EV charging planner. It displays today's and tomorrow's electricity spot prices on the same 24-hour chart, finds the cheapest charging periods and can control a charger through Home Assistant. It supports Sweden, Norway, Denmark and Finland and is available in Swedish, Norwegian, Danish, Finnish and English.
 
 <p align="center">
-  <img src="assets/widget_en.jpg" alt="Elpris widget showing today's and tomorrow's electricity prices" width="720">
+  <img src="assets/widget_en.jpg" alt="SpotNav widget showing today's and tomorrow's electricity prices" width="720">
 </p>
 
 ## Features
@@ -32,7 +32,7 @@ Elpris is a configurable Android home-screen widget that displays today's and to
 ## Installation
 
 1. Download the APK from [Releases](../../releases).
-2. Install it and add **Elpris** from the Android widget picker.
+2. Install it and add **SpotNav** from the Android widget picker.
 3. Select a language, price area, resolution and any applicable taxes or fees.
 4. Tap the widget to open its settings, price table and EV planner.
 
@@ -60,9 +60,9 @@ VAT is applied last and follows the selected market. Suggested tax values are ed
 
 ## Home Assistant charging control
 
-Elpris can send its calculated charging period, start, stop and cancel commands to the separate [Elpris charging control integration](https://github.com/henrikekblad/elpris-home-assistant). Home Assistant stores and executes the schedule, so it does not depend on the phone remaining online.
+SpotNav can send its calculated charging periods and charging commands to the separate [SpotNav charging control integration](https://github.com/henrikekblad/spotnav-home-assistant). Home Assistant stores and executes the schedule, so it does not depend on the phone remaining online.
 
-Install the integration through HACS and select the charger controls during setup. In Home Assistant, open the integration's **App connection** entity and copy its `webhook_id` attribute. Then enter the Home Assistant address and webhook ID under **Settings → Home Assistant** in Elpris and tap **Test connection**. HTTPS is required for internet addresses; private local IP addresses and local hostnames may use HTTP. No Home Assistant account password or general access token is stored in the app.
+Install the integration through HACS and select the charger controls during setup. In Home Assistant, open the integration's **App connection** entity and copy its `webhook_id` attribute. Then enter the Home Assistant address and webhook ID under **Settings → Home Assistant** in SpotNav and tap **Test connection**. HTTPS is required for internet addresses; private local IP addresses and local hostnames may use HTTP. No Home Assistant account password or general access token is stored in the app.
 
 In the EV tab, **Start now** applies the currently selected amperage before enabling charging. The schedule button shows whether the calculated periods are synchronized with Home Assistant or need to be sent or updated.
 
@@ -86,16 +86,14 @@ The debug APK is created in `app/build/outputs/apk/debug/`.
 Successful API responses are cached locally by date and price area. The app does not collect or transmit personal data.
 
 ```bash
-adb logcat -d | grep -E 'ElprisRepository|ElprisWidget|ElprisScheduler'
+adb logcat -d | grep -E 'SpotNavRepository|SpotNavWidget|SpotNavScheduler'
 ```
 
 Logs contain URLs, HTTP status codes, parsed price counts, cache hits and the next scheduled check, but no passwords or personal information.
 
 ## Disclaimer
 
-Elpris is not affiliated with the API providers, Nord Pool, electricity retailers or grid operators. Prices and charging calculations are guidance only; always verify them against your agreement and invoice.
-
-Package name: `se.sensnology.elpris`
+SpotNav is not affiliated with the API providers, Nord Pool, electricity retailers or grid operators. Prices and charging calculations are guidance only; always verify them against your agreement and invoice.
 
 ## License
 

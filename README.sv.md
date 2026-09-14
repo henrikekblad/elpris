@@ -1,11 +1,11 @@
-# Elpris
+# SpotNav
 
 [English documentation](README.md)
 
 En anpassningsbar Android-widget som visar spotpriser för idag och imorgon på samma 24-timmarsaxel. Appen stöder svenska SE1–SE4, norska NO1–NO5, danska DK1–DK2 och Finland samt svenska, norska, danska, finska och engelska.
 
 <p align="center">
-  <img src="assets/widget.jpg" alt="Elpriswidget med dagens och morgondagens priser" width="720">
+  <img src="assets/widget.jpg" alt="SpotNav-widget med dagens och morgondagens priser" width="720">
 </p>
 
 ## Funktioner
@@ -32,7 +32,7 @@ En anpassningsbar Android-widget som visar spotpriser för idag och imorgon på 
 ## Användning
 
 1. Installera APK-filen från projektets [Releases](../../releases).
-2. Lägg till **Elpris** från startskärmens widgetväljare.
+2. Lägg till **SpotNav** från startskärmens widgetväljare.
 3. Välj elområde, upplösning och eventuella påslag.
 4. Tryck på widgeten för att öppna inställningar, pristabell och elbilsplanering.
 
@@ -44,13 +44,13 @@ Beräkningen utgår från 230 V enfas eller 400 V trefas och ideal laddningseffe
 
 ### Home Assistant-styrning
 
-Elpris kan skicka den beräknade laddperioden samt start-, stopp- och avbrytkommandon till den separata [Elpris charging control-integrationen](https://github.com/henrikekblad/elpris-home-assistant). Schemat sparas och utförs av Home Assistant och är därför inte beroende av att telefonen förblir ansluten.
+SpotNav kan skicka de beräknade laddperioderna och laddkommandon till den separata [SpotNav charging control-integrationen](https://github.com/henrikekblad/spotnav-home-assistant). Schemat sparas och utförs av Home Assistant och är därför inte beroende av att telefonen förblir ansluten.
 
-Installera integrationen genom HACS och välj laddarens styrentiteter. Öppna därefter integrationens entitet **Appanslutning** i Home Assistant och kopiera attributet `webhook_id`. Ange Home Assistant-adressen och detta webhook-ID under **Inställningar → Home Assistant** i Elpris och tryck **Testa anslutningen**. Internetadresser kräver HTTPS; privata lokala IP-adresser och lokala värdnamn kan använda HTTP. Appen lagrar varken lösenordet till ditt Home Assistant-konto eller någon generell åtkomsttoken.
+Installera integrationen genom HACS och välj laddarens styrentiteter. Öppna därefter integrationens entitet **Appanslutning** i Home Assistant och kopiera attributet `webhook_id`. Ange Home Assistant-adressen och detta webhook-ID under **Inställningar → Home Assistant** i SpotNav och tryck **Testa anslutningen**. Internetadresser kräver HTTPS; privata lokala IP-adresser och lokala värdnamn kan använda HTTP. Appen lagrar varken lösenordet till ditt Home Assistant-konto eller någon generell åtkomsttoken.
 
 Under Elbil ställer **Starta nu** först in det amperetal som är valt i appen och aktiverar sedan laddningen. Schemaknappen visar om appens beräknade perioder är synkroniserade med Home Assistant eller behöver skickas/uppdateras.
 
-Webhook-ID:t är en genererad hemlighet för Elpris-integrationen, inte en vanlig HA-token. Det är begränsat till laddaren som valts i integrationen och tar bara emot status-, schema-, avbryt-, start- och stoppkommandon. Publicera det inte och visa det inte i skärmbilder.
+Webhook-ID:t är en genererad hemlighet för SpotNav-integrationen, inte en vanlig HA-token. Det är begränsat till laddaren som valts i integrationen och tar bara emot status-, schema-, avbryt-, start- och stoppkommandon. Publicera det inte och visa det inte i skärmbilder.
 
 <p align="center">
   <img src="assets/charge.jpg" alt="Elbilsplanering med laddström, förbrukning, energimängd, avresetid och rekommenderad laddperiod" width="360">
@@ -98,7 +98,7 @@ Lyckade API-svar cachas lokalt per datum och elområde. Appen samlar inte in ell
 Relevanta Android-loggar kan läsas med:
 
 ```bash
-adb logcat -d | grep -E 'ElprisRepository|ElprisWidget|ElprisScheduler'
+adb logcat -d | grep -E 'SpotNavRepository|SpotNavWidget|SpotNavScheduler'
 ```
 
 Loggarna innehåller URL, HTTP-status, antal parsade priser, cacheträffar och nästa schemalagda kontroll – men inga lösenord eller personuppgifter.
@@ -106,10 +106,6 @@ Loggarna innehåller URL, HTTP-status, antal parsade priser, cacheträffar och n
 ## Datakälla och ansvar
 
 Prisdata tillhandahålls av [Elpriset just nu](https://www.elprisetjustnu.se/elpris-api). Projektet är inte anslutet till dataleverantören, Nord Pool, något elbolag eller elnätsföretag. Uppgifterna är vägledande; kontrollera alltid ditt avtal och din faktura.
-
-## Paketnamn
-
-`se.sensnology.elpris`
 
 ## Licens
 
