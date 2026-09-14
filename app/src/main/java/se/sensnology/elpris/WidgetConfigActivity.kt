@@ -218,7 +218,9 @@ class WidgetConfigActivity : Activity() {
                     transfer = transfer.isChecked, taxMinorUnit = number(taxValue), gridFeeMinorUnit = number(transferValue),
                     intervalMinutes = if (interval.checkedRadioButtonId == hourId) 60 else 15
                 ))
-                PriceWidgetProvider.update(this@WidgetConfigActivity, AppWidgetManager.getInstance(this@WidgetConfigActivity), widgetId)
+                if (widgetId > 0) {
+                    PriceWidgetProvider.update(this@WidgetConfigActivity, AppWidgetManager.getInstance(this@WidgetConfigActivity), widgetId)
+                }
                 if (!editing) {
                     setResult(RESULT_OK, Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)); finish()
                 } else Toast.makeText(this@WidgetConfigActivity, t(R.string.updated), Toast.LENGTH_SHORT).show()
@@ -404,7 +406,9 @@ class WidgetConfigActivity : Activity() {
 
     private fun saveCharging(value: WidgetSettings) {
         WidgetSettings.save(this, widgetId, value)
-        PriceWidgetProvider.update(this, AppWidgetManager.getInstance(this), widgetId)
+        if (widgetId > 0) {
+            PriceWidgetProvider.update(this, AppWidgetManager.getInstance(this), widgetId)
+        }
     }
 
     private fun addHomeAssistantSettings() {

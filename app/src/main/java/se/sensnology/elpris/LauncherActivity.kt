@@ -92,7 +92,9 @@ class LauncherActivity : Activity() {
     private fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()
 
     companion object {
-        private const val STANDALONE_SETTINGS_ID = 0
+        // Zero is AppWidgetManager.INVALID_APPWIDGET_ID, so the standalone
+        // profile must use a distinct ID that can never belong to a widget.
+        private const val STANDALONE_SETTINGS_ID = -1
         private const val PREFS = "launcher_settings"
         private const val PREFERRED_WIDGET = "preferred_widget"
 
